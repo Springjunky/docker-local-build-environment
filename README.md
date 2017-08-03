@@ -34,4 +34,5 @@ And _yes_ docker-plugin in jenkins works (docker in docker, usefull but not reco
 
 * Pump up the Image with latest docker and ansible
 * move the personal DNS-Server outsite the docker-compose (ENV)
+* optimze Dockerfiles to use less number of layers during build
 
