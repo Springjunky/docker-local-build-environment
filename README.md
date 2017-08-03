@@ -22,8 +22,8 @@ and cut and paste the jenkins first startup access-token.
 
 Now you are ready to go with a little CI Environment and Sonar code-quality check.
 
-Jenkins resides under http\://\<your-host-name\>/jenkins
-Sonar resides under http\://\<your-host-name\>/sonar
+* Jenkins resides under http\://\<your-host-name\>/jenkins
+* Sonar resides under http\://\<your-host-name\>/sonar
 
 After docker ist up you only have to configure your tools in Jenkins
 ..
