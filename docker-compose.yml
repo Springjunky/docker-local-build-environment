@@ -1,0 +1,61 @@
+# This version maps 
+# Jenkins to http://your-host/jenkins 
+# Sonar to   http://your-host/sonar
+# If you want to change the mapping you have to do
+# the following.
+# Jenkins: Edit Dockerfile of Jenkinst (--prefix=/jenkins) at top
+#          Edit location in the reverse-proxy.conf 
+# Sonar:   Edit sonar.properties in directory sonar.properties
+#          Edit location in the reverse-proxy.conf  
+
+version: "3"
+services: 
+  
+  ngnix:
+     build: nginx-reverse
+     ports: 
+       - "80:80"
+  
+  jenkins-fat:
+    build: jenkins-fat
+    # Change this if your lokal-DNS Server does not match, use to resolve your local host via local DNS
+    dns: 192.168.178.1
+    volumes:
+      - jenkins_home:/var/jenkins_home 
+      - /var/run/docker.sock:/var/run/docker.sock
+  sonar-db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+    volumes:
+      - postgresql:/var/lib/postgresql
+      # This needs explicit mapping due to 
+      # https://github.com/docker-library/postgres/blob/4e48e3228a30763913ece952c611e5e9b95c8759/Dockerfile.template#L52
+      - postgresql_data:/var/lib/postgresql/data
+
+  sonar:
+    build: sonarqube-custom
+    # Change this if your lokal-DNS Server does not match,  use to resolve your local host via local DNS
+    dns: 192.168.178.1
+    environment:
+      - SONARQUBE_JDBC_URL=jdbc:postgresql://sonar-db:5432/sonar
+    volumes:
+      - sonarqube_conf:/opt/sonarqube/conf
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
+      
+#These are docker-volumes, reside in /var/lib/docker
+# ... consider host-volumes if you want to have an easy backup
+volumes:
+  sonarqube_conf:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_bundled-plugins:
+  postgresql:
+  postgresql_data:
+  jenkins_home:
+  jenkins_home_docker:
+  
+    
