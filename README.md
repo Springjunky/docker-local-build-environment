@@ -14,15 +14,16 @@ Bring up your own build environment ... just do a
    docker-compose up -d
    docker-compose logs 
 ```
-open your favorite browser (_not_ at localhost, use [http://<your-fq-hostname>] to prevent jenkins spit out "your reverse proxy is wrong")
+open your favorite browser (_not_ at localhost, use http\://\<your-fq-hostname\>/jenkins 
+to prevent jenkins spit out "your reverse proxy is wrong")
 and cut and paste the jenkins first startup access-token.
 
 ### Ready !
 
 Now you are ready to go with a little CI Environment and Sonar code-quality check.
 
-Jenkins resides under http://<your-host-name>/jenkins
-Sonar resides under http://<your-host-name>/sonar
+Jenkins resides under http\://\<your-host-name\>/jenkins
+Sonar resides under http\://\<your-host-name\>/sonar
 
 After docker ist up you only have to configure your tools in Jenkins
 ..
