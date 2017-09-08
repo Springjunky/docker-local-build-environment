@@ -9,14 +9,14 @@ lokal, personal, continous build enviroment (maybe in future releses I just call
 
 Bring up your own build environment ... just do a
 ```
-   https://github.com/Springjunky/docker-local-build-environment.git
+   git clone https://github.com/Springjunky/docker-local-build-environment.git
    cd docker-local-build-environment
    docker-compose up -d
    docker-compose logs 
 ```
 open your favorite browser (_not_ at localhost, use http\://\<your-fq-hostname\>/jenkins 
 to prevent jenkins spit out "your reverse proxy is wrong")
-and cut and paste the jenkins first startup access-token.
+and cut and paste the jenkins first startup access-token (see logfile of compose-startup).
 
 ### Ready !
 
@@ -32,7 +32,8 @@ And _yes_ docker-plugin in jenkins works (docker in docker, usefull but not reco
 
 ### My next steps
 
-* Pump up the Image with latest docker and ansible
+* Pump up the Image with latest docker, ansible, gitlab and Sonatype Nexus
 * move the personal DNS-Server outsite the docker-compose (ENV)
 * optimze Dockerfiles to use less number of layers during build
+* 
 
