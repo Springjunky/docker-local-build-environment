@@ -1,6 +1,6 @@
 ## docker-local-build-environment
 
-##### Tired of endless installation and configuration .... ?! 
+### Tired of endless installation and configuration .... ?! 
 
 My personal solution is a local Build Environment with Jenkins full of plugins and sonar; ready in 60sec. with a
 lokal, personal, continous build enviroment (maybe in future releses I just call it lpcbe).
