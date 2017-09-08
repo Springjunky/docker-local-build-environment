@@ -33,7 +33,7 @@ And _yes_ docker-plugin in jenkins works (docker in docker, usefull but not reco
 ### My next steps
 
 * Pump up the Image with latest docker, ansible, gitlab and Sonatype Nexus
-* move the personal DNS-Server outsite the docker-compose (ENV)
+* move the personal DNS-Server outsite the docker-compose (ENV) at this time it is hardcode in the compose-file
 * optimze Dockerfiles to use less number of layers during build
 * 
 
