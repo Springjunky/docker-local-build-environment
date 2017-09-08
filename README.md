@@ -20,7 +20,7 @@ and cut and paste the jenkins first startup access-token (see logfile of compose
 
 ### Ready !
 
-Now you are ready to go with a little CI Environment and Sonar code-quality check.
+Now you are ready to go with a little continouse build environment and Sonar code-quality check.
 
 * Jenkins resides under http\://\<your-host-name\>/jenkins
 * Sonar resides under http\://\<your-host-name\>/sonar
@@ -32,7 +32,7 @@ And _yes_ docker-plugin in jenkins works (docker in docker, usefull but not reco
 
 ### My next steps
 
-* Pump up the Image with latest docker, ansible, gitlab and Sonatype Nexus
+* Pump up the Image with latest docker, ansible, gitlab and Sonatype Nexus to get a _full_ CI/CD Environment
 * move the personal DNS-Server outsite the docker-compose (ENV) at this time it is hardcode in the compose-file
 * optimze Dockerfiles to use less number of layers during build
  
