@@ -1,39 +1,87 @@
 ## docker-local-build-environment
 
-### Tired of endless installation and configuration .... ?! 
+##### Tired of endless installation and configuration .... ?! 
 
-My personal solution is a local Build Environment with Jenkins full of plugins and sonar; ready in 60sec. with a
-lokal, personal, continous build enviroment (maybe in future releses I just call it lpcbe).
+My personal solution is a local Build Environment with Jenkins (over 200 plugins), Gitlab, Sonar and Nexus; ready in a few minutes.
+Your own lokal, personal, continous build enviroment (maybe in future releases I just call it lpcbe).
 
+### System requirements
+* At least 8GB Memory with 3GB Swap and 10GB Disk-Space
+* docker version >= 17.06.0
+* docker-compose version >= 1.15.0
 
-
+## Installation
 Bring up your own build environment ... just do a
 ```
-   git clone https://github.com/Springjunky/docker-local-build-environment.git
+   https://github.com/Springjunky/docker-local-build-environment.git
    cd docker-local-build-environment
-   docker-compose up -d
+   sudo ./prepareCompose.sh 
+   docker-compose up --build -d
    docker-compose logs 
 ```
-open your favorite browser (_not_ at localhost, use http\://\<your-fq-hostname\>/jenkins 
+### The first startup takes a long time (especially gitlab), so be patient
+
+open your favorite browser (_not_ at localhost, use the $(hostname)/jenkins ) 
 to prevent jenkins spit out "your reverse proxy is wrong")
-and cut and paste the jenkins first startup access-token (see logfile of compose-startup).
 
 ### Ready !
 
-Now you are ready to go with a little continouse build environment and Sonar code-quality check.
+Now you are ready to go with a little CI/CD Environment:
+```
+ Jenkins  http://<your-host-name>/jenkins
+ Sonar  http://<your-host-name>/sonar
+ Nexus  http://<your-host-name>/nexus
+ Gitlab  http://<your-host-name>/gitlab
+```
+#### Security
+... not really, its all http .. don't worry about it! It's only local communication
 
-* Jenkins resides under http\://\<your-host-name\>/jenkins
-* Sonar resides under http\://\<your-host-name\>/sonar
+### Logins and Passwords
 
-After docker ist up you only have to configure your tools in Jenkins
+|Image  |  User  |  Password |
+|---|---|---|
+|Jenkins| admin| admin |
+|Sonar|admin|admin|
+|Nexus   | admin | admin123 |
+|Gitlab  | root  | choosen Password |
+
+## The Tools
+### Jenkins
+
+* MAVEN_HOME is /opt/maven
+* JAVA_HOME is /usr/lib/jvm/java-8-openjdk-amd64
+* Blue Ocean is installed and works perfect with a GitHUB Account, not GitLab ... sorry, this is Jenkins.
+  You need to be logged in to use Blue Ocean
+
+###  Giltab
+
+* the docker-registry is at port 5555 (and secured with an openssl certificate ..thats part of 
+  prepareCompose.sh), just create a project in gitlab and click at the  registry tab to show 
+  how to login to the project registry and how to tag your images
+* ssh cloning and pushing is at port 2222
+
+#### Jenkins and Gitlab
+
+Gitlab is very very fast with new releases and sometimes the api has breaking changes. If something does not work take a look at the Jenkins Bugtracker.
+
+### Sonar
+You need to install some rules (Administration - System - Update Center - Available - Serach: Java)
+
+### Nexus
+Some ToDo for me described here
+[Unsecure docker-registry in Nexus][1]
+use GitLab as a secured registry
+
 ..
 And _yes_ docker-plugin in jenkins works (docker in docker, usefull but not recommended)
 
 
 ### My next steps
 
-* Pump up the Image with latest docker, ansible, gitlab and Sonatype Nexus to get a _full_ CI/CD Environment
-* move the personal DNS-Server outsite the docker-compose (ENV) at this time it is hardcode in the compose-file
-* optimze Dockerfiles to use less number of layers during build
- 
+* give you some more preconfiguratiom
+* apply a gitlab runner
+* apply git-lfs
 
+
+
+[1]: https://support.sonatype.com/hc/en-us/articles/217542177-Using-Self-Signed-Certificates-with-Nexus-Repository-Manager-and-Docker-Daemon

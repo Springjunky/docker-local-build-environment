@@ -4,24 +4,33 @@ ENV JAVA_VERSION=8 \
     JAVA_UPDATE=131 \
     JAVA_BUILD=11 \
     JAVA_HOME="/usr/lib/jvm/default-jvm"
+
 # update dpkg repositories and install tools
+
 RUN apt-get update 
-RUN apt-get install -y openjdk-8-jdk 
-RUN apt-get install -y --no-install-recommends apt-utils
-RUN apt-get install -y git 
-RUN apt-get install -y wget
-RUN apt-get install -y curl
-RUN apt-get install -y graphviz
+#------------ Open JDK
+RUN apt-get install -y openjdk-8-jdk
+#------------ Tools f Jenkins and apt-get to use SSL Repositorys
+RUN apt-get install -y --no-install-recommends apt-utils git wget curl graphviz \
+    apt-transport-https ca-certificates software-properties-common
+#------------ Docker
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg > docker-public-key && apt-key add docker-public-key && rm docker-public-key
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+RUN apt-get update && apt-get install -y docker-ce
+#------------ Docker Compose
+RUN curl -o /usr/bin/docker-compose -L "https://github.com/docker/compose/releases/download/1.15.0/docker-compose-$(uname -s)-$(uname -m)" \
+    && chmod +x /usr/bin/docker-compose
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
 # This is the line for the Jenkins prefix to set ... remember
 # to set the location in the  reverse-proxy.conf
 ENV JENKINS_OPTS="--webroot=/var/cache/jenkins/war --prefix=/jenkins"
-
+ENV GIT_SSL_NO_VERIFY=1
 #-----------------------------------------------
 #  install Oracle Java if you want ... and 
 #  remove the line "RUN apt-get install -y openjdk-8-jdk"
+# and uncomment the next lines
 #  above ... but openjdk is pretty good ! 
 #-----------------------------------------------
 #------------ Download
@@ -40,14 +49,11 @@ RUN wget --no-verbose -O /tmp/apache-maven-3.2.5.tar.gz http://archive.apache.or
 # verify checksum
 RUN echo "b2d88f02bd3a08a9df1f0b0126ebd8dc /tmp/apache-maven-3.2.5.tar.gz" | md5sum -c
 # install maven
-RUN tar xzf /tmp/apache-maven-3.2.5.tar.gz -C /opt/
-RUN ln -s /opt/apache-maven-3.2.5 /opt/maven
-ENV MAVEN_HOME /opt/maven
+RUN tar xzf /tmp/apache-maven-3.2.5.tar.gz -C /opt/ && ln -s /opt/apache-maven-3.2.5 /opt/maven
+ENV MAVEN_HOME /opt/maven 
 ENV PATH $MAVEN_HOME/bin:$JAVA_HOME/bin:$PATH
 
-RUN apt-get update && apt-get install -y  zip unzip
-RUN rm -rf /opt/java/src.zip && rm -rf /tmp/$filename 
-RUN rm -f /tmp/apache-maven-3.2.5.tar.gz
+RUN apt-get update && apt-get install -y  zip unzip && rm -rf /opt/java/src.zip && rm -rf /tmp/$filename && rm -f /tmp/apache-maven-3.2.5.tar.gz
 #------------------------------
 # install Jenkins
 #------------------------------
@@ -80,12 +86,12 @@ COPY init.groovy /usr/share/jenkins/ref/init.groovy.d/tcp-slave-agent-port.groov
 
 # jenkins version being bundled in this docker image 
 ARG JENKINS_VERSION
-ENV JENKINS_VERSION ${JENKINS_VERSION:-2.71}
+ENV JENKINS_VERSION ${JENKINS_VERSION:-2.79}
 
 # jenkins.war checksum, download will be validated using it
-ARG JENKINS_SHA=71b2b5ba6d7fca261325682639ba604b7b889e7e
+ARG JENKINS_SHA=272e035475837b5e1c4efb84c8b65949e3f658a3
 
-# Can be used to customize where jenkins.war get downloaded from http://updates.jenkins-ci.org/download/war/2.57/jenkins.war
+# Can be used to customize where jenkins.war get downloaded from http://updates.jenkins-ci.org/download/war/2.79/jenkins.war
 ARG JENKINS_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war
 
 # could use ADD but this one does not check Last-Modified header neither does it allow to control checksum 
@@ -108,7 +114,6 @@ COPY jenkins.sh /usr/local/bin/jenkins.sh
 
 ENV JAVA_OPTIONS="-Djava.awt.headless=true -Dhudson.security.csrf.requestfield=crumb"
 
-
 ENTRYPOINT ["/bin/tini", "--", "/usr/local/bin/jenkins.sh"]
 #-----------------------------------------------
 # get all Plugins from existing Jenins
@@ -123,10 +128,6 @@ COPY install-plugins.sh /usr/local/bin/install-plugins.sh
 # Install additional plugins
 COPY plugins.txt /usr/share/jenkins/ref/
 RUN /usr/local/bin/plugins.sh /usr/share/jenkins/ref/plugins.txt
-
-
-
-
 
 USER root
 

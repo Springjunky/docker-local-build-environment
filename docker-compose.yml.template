@@ -1,9 +1,9 @@
 #####################################
 # Don't touch this file is generated 
-# expecilly for: tom-VirtualBox
+# expecilly for: HOSTNAME
 ###################################
 #
-# Consider to Backup  /home/tom/devstack-data
+# Consider to Backup  BASE_DATA_DIR
 #
 version: "3"
 services: 
@@ -16,9 +16,9 @@ services:
        - "5555:5555"   #Gitlab Docker Registry do NOT use 5000, this is an internal PORT of the gitlab-ce Image
   jenkins-fat:
     build: jenkins-fat
-    dns: 192.168.178.1
+    dns: DNS_SERVER
     volumes:
-      - /home/tom/devstack-data/jenkins:/var/jenkins_home 
+      - BASE_DATA_DIR/jenkins:/var/jenkins_home 
       - /var/run/docker.sock:/var/run/docker.sock
   sonar-db:
     image: postgres
@@ -26,47 +26,47 @@ services:
       - POSTGRES_USER=sonar
       - POSTGRES_PASSWORD=sonar
     volumes:
-      - /home/tom/devstack-data/sonar-db/postgresql:/var/lib/postgresql
+      - BASE_DATA_DIR/sonar-db/postgresql:/var/lib/postgresql
       # This needs explicit mapping due to 
       # https://github.com/docker-library/postgres/blob/4e48e3228a30763913ece952c611e5e9b95c8759/Dockerfile.template#L52
-      - /home/tom/devstack-data/sonar-db/postgresql_data:/var/lib/postgresql/data
+      - BASE_DATA_DIR/sonar-db/postgresql_data:/var/lib/postgresql/data
   sonar:
     image: sonarqube
-    dns: 192.168.178.1
+    dns: DNS_SERVER
     environment:
       - SONARQUBE_JDBC_URL=jdbc:postgresql://sonar-db:5432/sonar
     volumes:
-      - /home/tom/devstack-data/sonar/sonarqube_conf:/opt/sonarqube/conf
-      - /home/tom/devstack-data/sonar/sonarqube_data:/opt/sonarqube/data
-      - /home/tom/devstack-data/sonar/sonarqube_extensions:/opt/sonarqube/extensions
-      - /home/tom/devstack-data/sonar/sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
+      - BASE_DATA_DIR/sonar/sonarqube_conf:/opt/sonarqube/conf
+      - BASE_DATA_DIR/sonar/sonarqube_data:/opt/sonarqube/data
+      - BASE_DATA_DIR/sonar/sonarqube_extensions:/opt/sonarqube/extensions
+      - BASE_DATA_DIR/sonar/sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
   gitlab:
     image: 'gitlab/gitlab-ce:latest'
-    dns: 192.168.178.1
+    dns: DNS_SERVER
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://tom-VirtualBox/gitlab'
+        external_url 'http://HOSTNAME/gitlab'
         gitlab_rails['gitlab_shell_ssh_port'] = 2222
         # docker-registry config
-        registry_external_url 'https://tom-VirtualBox:5555'
+        registry_external_url 'https://HOSTNAME:5555'
         registry_nginx['listen_port'] = 5555
         registry_nginx['listen_https'] = true
         # SSL config just for the docker-registry need
-        nginx['ssl_certificate'] = "/etc/gitlab/ssl/tom-VirtualBox.crt"
-        nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/tom-VirtualBox.key"
+        nginx['ssl_certificate'] = "/etc/gitlab/ssl/HOSTNAME.crt"
+        nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/HOSTNAME.key"
         registry_nginx['proxy_set_headers'] = {
         "X-Forwarded-Proto" => "https",
         "X-Forwarded-Ssl" => "on"
         }
     volumes:
-      - /home/tom/devstack-data/gitlab/config:/etc/gitlab
-      - /home/tom/devstack-data/gitlab/logs:/var/log/gitlab
-      - /home/tom/devstack-data/gitlab/data:/var/opt/gitlab
+      - BASE_DATA_DIR/gitlab/config:/etc/gitlab
+      - BASE_DATA_DIR/gitlab/logs:/var/log/gitlab
+      - BASE_DATA_DIR/gitlab/data:/var/opt/gitlab
   nexus:
     image: sonatype/nexus3
-    dns: 192.168.178.1
+    dns: DNS_SERVER
     environment:
       - NEXUS_CONTEXT=nexus
     volumes:
-      - /home/tom/devstack-data/nexus:/nexus-data   
+      - BASE_DATA_DIR/nexus:/nexus-data   
   
