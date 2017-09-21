@@ -65,7 +65,7 @@ Now you are ready to go with a little CI/CD Environment:
 Gitlab is very very fast with new releases and sometimes the api has breaking changes. If something does not work take a look at the Jenkins Bugtracker.
 
 ### Sonar
-You need to install some rules (Administration - System - Update Center - Available - Serach: Java)
+You need to install some rules (Administration - System - Update Center - Available - Search: Java)
 
 ### Nexus
 Some ToDo for me described here
