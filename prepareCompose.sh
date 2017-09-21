@@ -16,7 +16,7 @@ echo "Verify your DNS to resolve local hostname, I set it to  ${DNS_SERVER}   "
 echo "in most cases this is the ip of your router (fritz-box)                 "
 echo "if this is wrong the container network does not reach each other because"
 echo "the \"routing \" ist out of container an back into with nginx :-)       "
-echo " and 8.8.8.8 (Google Nameserver) does not now your internal name "
+echo " and 8.8.8.8 (Google Nameserver) does not known your internal name "
 echo "########################################################################"
 
 type openssl 2>/dev/null
