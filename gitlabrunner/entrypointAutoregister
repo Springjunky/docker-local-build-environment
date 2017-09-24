@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# gitlab-ci-multi-runner data directory
+DATA_DIR="/etc/gitlab-runner"
+CONFIG_FILE=${CONFIG_FILE:-$DATA_DIR/config.toml}
+# custom certificate authority path
+CA_CERTIFICATES_PATH=${CA_CERTIFICATES_PATH:-$DATA_DIR/certs/ca.crt}
+LOCAL_CA_PATH="/usr/local/share/ca-certificates/ca.crt"
+
+update_ca() {
+  echo "Updating CA certificates..."
+  cp "${CA_CERTIFICATES_PATH}" "${LOCAL_CA_PATH}"
+  update-ca-certificates --fresh >/dev/null
+}
+
+if [ -f "${CA_CERTIFICATES_PATH}" ]; then
+  # update the ca if the custom ca is different than the current
+  cmp --silent "${CA_CERTIFICATES_PATH}" "${LOCAL_CA_PATH}" || update_ca
+fi
+
+
+###########################################################################################################
+echo "Try to autoregister runner at ${GITLAB_URL} with ${REGISTER_TOKEN} with $REGISTER_TRYS trys"
+
+grep docker-runner /etc/gitlab-runner/config.toml 2>/dev/null 1>/dev/null
+RUNNER_IS_PRESENT=$?
+
+if test $REGISTER_MODE = "KEEP" -a $RUNNER_IS_PRESENT -eq 0 ; then
+   echo "Keeping old runner"
+fi
+
+TRYS=$REGISTER_TRYS
+REGISTERED=1
+
+if test $REGISTER_MODE = "FRESH" -o  $RUNNER_IS_PRESENT -ne 0 ; then 
+    while test $TRYS -gt 0 -a $REGISTERED -gt 0 ; do
+      TRYS=$(expr $TRYS - 1)
+      gitlab-runner register -n --url=${GITLAB_URL} --registration-token=${REGISTER_TOKEN} \
+      --executor=docker --name=docker-runner \
+      --run-untagged=true --locked=false --docker-image=docker:latest \
+      --docker-privileged 
+      REGISTERED=$?
+      if [ $REGISTERED -ne 0 ] ; then
+        echo "${GITLAB_URL} not ready $TRYS trys left, next try in 10 second for ${GITLAB_URL}"  
+        sleep 10
+      else
+        # Gitlab is ready, so remove ALL runner and re-registrer only one runner
+        # so we have a clean state
+        sleep 1
+        gitlab-runner unregister --all-runners
+        sleep 1
+        gitlab-runner verify --delete
+        sleep 1
+        gitlab-runner register -n --url=${GITLAB_URL} --registration-token=${REGISTER_TOKEN} \
+        --executor=docker --name=docker-runner \
+        --run-untagged=true --locked=false --docker-image=docker:latest \
+        --docker-privileged 
+      fi
+   done  
+fi
+
+# launch gitlab-ci-multi-runner passing all arguments
+exec gitlab-ci-multi-runner "$@"

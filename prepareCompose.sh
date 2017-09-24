@@ -72,7 +72,7 @@ fi
 # sonar.properties
 if [ -f $USER_DATA_DIR/sonar/sonarqube_conf/sonar.properties ] ; then
   echo "WARNING: $USER_DATA_DIR/sonar/sonarqube_conf/sonar.properties exists"
-  echo "make sure it has an sonar.web.context=/sonar entry"
+  echo "make sure it has a sonar.web.context=/sonar entry"
 else
   cp preconfig/sonar/sonar.properties $USER_DATA_DIR/sonar/sonarqube_conf
 fi  
@@ -84,7 +84,9 @@ cp -r preconfig/jenkins/* $USER_DATA_DIR/jenkins/
 sed s#BASE_DATA_DIR#${USER_DATA_DIR}#g docker-compose.yml.template > docker-compose.yml
 sed -i s#DNS_SERVER#${DNS_SERVER}#g docker-compose.yml
 sed -i s#HOSTNAME#${HOSTNAME}#g docker-compose.yml
-
+chmod a+rw docker-compose.yml
+echo "-------------------------------------------------------------------------------------------"
+echo "-------------------------------------------------------------------------------------------"
 echo "docker-compose.yml created"
 echo "run " 
 echo "docker-compose up --build -d "

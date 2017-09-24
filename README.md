@@ -43,7 +43,7 @@ Now you are ready to go with a little CI/CD Environment:
 |Jenkins| admin| admin |
 |Sonar|admin|admin|
 |Nexus   | admin | admin123 |
-|Gitlab  | root  | choosen Password |
+|Gitlab  | root  | gitlab4me |
 
 ## The Tools
 ### Jenkins
@@ -59,6 +59,16 @@ Now you are ready to go with a little CI/CD Environment:
   prepareCompose.sh), just create a project in gitlab and click at the  registry tab to show 
   how to login to the project registry and how to tag your images
 * ssh cloning and pushing is at port 2222
+ 
+#### gitlab-runner
+The runner is a gitlab-multirunner image with a docker-runner (concurrent=1) , based on [gitlab/gitlab-runner][2]  The docker-compose section has an environment called
+REGISTER_MODE, it can set to KEEP or REFRESH
+* KEEP register at one time a runner and keep it during startups
+* REFRESH at every startup remove all old runners and register one new runner (the pipeline-history ist lost.)
+
+It takes a long time until gitlab is ready to accept a runner registration, if it fails, increase the REGISTER_TRYS
+
+
 
 #### Jenkins and Gitlab
 
@@ -79,9 +89,10 @@ And _yes_ docker-plugin in jenkins works (docker in docker, usefull but not reco
 ### My next steps
 
 * give you some more preconfiguratiom
-* apply a gitlab runner
+* ~~apply a gitlab runner~~
 * apply git-lfs
 
 
 
 [1]: https://support.sonatype.com/hc/en-us/articles/217542177-Using-Self-Signed-Certificates-with-Nexus-Repository-Manager-and-Docker-Daemon
+[2]: https://hub.docker.com/r/gitlab/gitlab-runner/
