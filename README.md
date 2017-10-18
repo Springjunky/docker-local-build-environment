@@ -13,7 +13,7 @@ Your own lokal, personal, continous build enviroment (maybe in future releases I
 ## Installation
 Bring up your own build environment ... just do a
 ```
-   https://github.com/Springjunky/docker-local-build-environment.git
+   git clone https://github.com/Springjunky/docker-local-build-environment.git
    cd docker-local-build-environment
    sudo ./prepareCompose.sh 
    docker-compose up --build -d
