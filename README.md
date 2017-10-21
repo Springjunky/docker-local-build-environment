@@ -35,7 +35,8 @@ Now you are ready to go with a little CI/CD Environment:
 ```
 #### Security
 ... not really, its all http .. don't worry about it! It's only local communication
-<span style="color:red">WARNING</span>
+
+WARNING
 All the Services are reachable because docker creates and deletes dynamically FORWARD Rules with ACCEPT on startup / shutdown containers with exported ports.
 To deny acccess froum outer world the DOCKER-USER Chain (since docker 17.06) ist the medium of choice.
 A little Script to deny all access from outer world to your local build environment could be
