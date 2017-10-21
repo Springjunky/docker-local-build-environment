@@ -35,6 +35,40 @@ Now you are ready to go with a little CI/CD Environment:
 ```
 #### Security
 ... not really, its all http .. don't worry about it! It's only local communication
+<span style="color:red">WARNING</span>
+All the Services are reachable because docker creates and deletes dynamically FORWARD Rules with ACCEPT on startup / shutdown containers with exported ports.
+To deny acccess froum outer world the DOCKER-USER Chain (since docker 17.06) ist the medium of choice.
+A little Script to deny all access from outer world to your local build environment could be
+```
+#!/bin/bash
+if [ $# -lt 1 ] ; then
+  echo "Need your external interface as one parameter"
+  echo "Common names are eth0, enp...,"
+  echo "List of your names"
+  ifconfig -a | sed 's/[ \t].*//;/^\(lo\|\)$/d'
+  exit
+fi
+
+PORTS_TO_BLOCK="80,5555,2222"
+EXTERNAL_INTERFACE=$1
+
+iptables -F DOCKER-USER
+iptables -F EXTERNAL-ACCESS-DENY
+iptables -X EXTERNAL-ACCESS-DENY
+
+iptables -N EXTERNAL-ACCESS-DENY
+iptables -A EXTERNAL-ACCESS-DENY -j LOG --log-prefix "DCKR-EXT-ACCESS-DENY:" --log-level 6
+iptables -A EXTERNAL-ACCESS-DENY -j DROP
+
+iptables -A DOCKER-USER -i $EXTERNAL_INTERFACE -p tcp --match multiport --dports $PORTS_TO_BLOCK -j EXTERNAL-ACCESS-DENY 
+iptables -A DOCKER-USER -j RETURN
+
+echo "Rules created "
+iptables -v -L DOCKER-USER
+iptables -v -L EXTERNAL-ACCESS-DENY
+echo "See logs with prefix DCKR-EXT-ACCESS-DENY:"
+```
+
 
 ### Logins and Passwords
 
