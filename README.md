@@ -37,7 +37,7 @@ Now you are ready to go with a little CI/CD Environment:
 ... not really, its all http .. don't worry about it! It's only local communication
 
 ##### security paranoia
-All the exposed ports are reachable from outer world because docker creates and deletes dynamically FORWARD rules with default policy ACCEPT on startup / shutdown containers witch have exported ports.
+All the exposed ports are reachable from outer world because docker creates and deletes dynamically FORWARD rules with default policy ACCEPT on startup / shutdown containers wich have exported ports.
 
 To deny acccess from outer world the DOCKER-USER Chain (since docker 17.06) ist the medium of choice for your own rules (this is the first target in the FORWARD-Chain and never touched by docker).
 
