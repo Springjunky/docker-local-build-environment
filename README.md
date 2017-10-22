@@ -55,7 +55,7 @@ fi
 PORTS_TO_BLOCK="80,5555,2222"
 EXTERNAL_INTERFACE=$1
 
-# Flush an delete custom Chains
+# Flush and delete custom Chains
 iptables -F DOCKER-USER
 iptables -F EXTERNAL-ACCESS-DENY
 iptables -X EXTERNAL-ACCESS-DENY
@@ -66,9 +66,12 @@ iptables -A EXTERNAL-ACCESS-DENY -j LOG --log-prefix "DCKR-EXT-ACCESS-DENY:" --l
 iptables -A EXTERNAL-ACCESS-DENY -j DROP
 
 # Block all incomming traffic for docker 
-iptables -A DOCKER-USER -i $EXTERNAL_INTERFACE -p tcp --match multiport --dports $PORTS_TO_BLOCK -j EXTERNAL-ACCESS-DENY 
+iptables -A DOCKER-USER -i $EXTERNAL_INTERFACE \
+         -p tcp --match multiport \
+         --dports $PORTS_TO_BLOCK \
+         -j EXTERNAL-ACCESS-DENY 
 
-# Restore default rule to return all the back to FORWARD-Chain
+# Restore default rule to return all the rest back to the FORWARD-Chain
 iptables -A DOCKER-USER -j RETURN
 
 echo "Rules created "
