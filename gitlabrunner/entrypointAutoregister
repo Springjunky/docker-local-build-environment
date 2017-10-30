@@ -36,7 +36,7 @@ if test $REGISTER_MODE = "FRESH" -o  $RUNNER_IS_PRESENT -ne 0 ; then
     while test $TRYS -gt 0 -a $REGISTERED -gt 0 ; do
       TRYS=$(expr $TRYS - 1)
       gitlab-runner register -n --url=${GITLAB_URL} --registration-token=${REGISTER_TOKEN} \
-      --executor=docker --name=docker-runner \
+      --executor=docker --name=docker-multi-runner \
       --run-untagged=true --locked=false --docker-image=docker:latest \
       --docker-privileged 
       REGISTERED=$?
@@ -52,7 +52,7 @@ if test $REGISTER_MODE = "FRESH" -o  $RUNNER_IS_PRESENT -ne 0 ; then
         gitlab-runner verify --delete
         sleep 1
         gitlab-runner register -n --url=${GITLAB_URL} --registration-token=${REGISTER_TOKEN} \
-        --executor=docker --name=docker-runner \
+        --executor=docker --name=docker--multi-runner \
         --run-untagged=true --locked=false --docker-image=docker:latest \
         --docker-privileged 
       fi

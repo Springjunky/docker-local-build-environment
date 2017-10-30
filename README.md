@@ -133,7 +133,10 @@ And _yes_ docker-plugin in jenkins works (docker in docker, usefull but not reco
 
 ### My next steps
 
-* give you some more preconfiguratiom
+* give you some more preconfiguration
+* ~~install docker~~
+* ~~install docker-compose~~
+* ~~install ansible~~
 * ~~apply a gitlab runner~~
 * apply git-lfs
 

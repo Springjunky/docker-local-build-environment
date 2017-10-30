@@ -6,6 +6,11 @@
 # Consider to Backup  BASE_DATA_DIR
 #
 version: "3"
+
+networks:
+  devstacknetwork:
+    driver: bridge
+
 services: 
   ngnix:
      build: nginx-reverse
@@ -14,9 +19,13 @@ services:
        # SSH Bypassing into gitlab, if you want to change this edit nginx.conf also
        - "2222:2222"   #ssh port of gitlab (ssh://git@myhostname:2222/scott/foo.git)
        - "5555:5555"   #Gitlab Docker Registry do NOT use 5000, this is an internal PORT of the gitlab-ce Image
+     networks:
+       - devstacknetwork
   jenkins-fat:
     build: jenkins-fat
     dns: DNS_SERVER
+    networks:
+      - devstacknetwork
     volumes:
       - BASE_DATA_DIR/jenkins:/var/jenkins_home 
       - /var/run/docker.sock:/var/run/docker.sock
@@ -30,9 +39,13 @@ services:
       # This needs explicit mapping due to 
       # https://github.com/docker-library/postgres/blob/4e48e3228a30763913ece952c611e5e9b95c8759/Dockerfile.template#L52
       - BASE_DATA_DIR/sonar-db/postgresql_data:/var/lib/postgresql/data
+    networks:
+       - devstacknetwork
   sonar:
     image: sonarqube
     dns: DNS_SERVER
+    networks:
+       - devstacknetwork
     environment:
       - SONARQUBE_JDBC_URL=jdbc:postgresql://sonar-db:5432/sonar
     volumes:
@@ -43,6 +56,8 @@ services:
   gitlab:
     image: 'gitlab/gitlab-ce:latest'
     dns: DNS_SERVER
+    networks:
+      - devstacknetwork
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'http://HOSTNAME/gitlab'
@@ -68,19 +83,22 @@ services:
   gitlabrunner:
     build: gitlabrunner
     dns: DNS_SERVER
+    networks:
+       - devstacknetwork
     environment:
       - DOCKER_DNS=DNS_SERVER
       - GITLAB_URL=http://HOSTNAME/gitlab
       - REGISTER_TOKEN=s3cretToken4Runner
-      - REGISTER_MODE=KEEP #KEEP register a new runner an keep it. FRESH unregister all runners and always install a new (pipeline-history lost!)
+      - REGISTER_MODE=FRESH #KEEP register a new runner an keep it. FRESH unregister all runners and always install a new (pipeline-history lost!)
       - REGISTER_TRYS=60 # every 10 seconds a try to register the runner..gitlab takes a long time to startup
     volumes:
       - BASE_DATA_DIR/gitlab-runner/config:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
-  
   nexus:
     image: sonatype/nexus3
     dns: DNS_SERVER
+    networks:
+       - devstacknetwork
     environment:
       - NEXUS_CONTEXT=nexus
     volumes:
