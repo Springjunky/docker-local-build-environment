@@ -130,6 +130,23 @@ use GitLab as a secured registry
 ..
 And _yes_ docker-plugin in jenkins works (docker in docker, usefull but not recommended)
 
+## Troubleshooting
+
+In most cases a wrong DNS-Server causes trouble, to check this try the follwing.
+* log into the sonarcube container (with id)
+```
+  docker container ls
+  docker container exec -it <your id> bash
+  ping google.de
+  ping jenkins-fat
+```
+both ping must be work
+
+* consider low memory
+  with an amount lower than 8GB sonar and eleastic search did not startup
+
+
+  
 
 ### My next steps
 
