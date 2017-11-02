@@ -2,7 +2,7 @@
 
 ##### Tired of endless installation and configuration .... ?! 
 
-My personal solution is a local Build Environment with Jenkins (over 200 plugins), Gitlab, Sonar and Nexus; ready in a few minutes.
+My personal solution is a local Build Environment with Jenkins, Gitlab, Sonar and Nexus; ready in a few minutes.
 Your own lokal, personal, continous build enviroment (maybe in future releases I just call it lpcbe).
 
 ### System requirements
@@ -142,9 +142,11 @@ In most cases a wrong DNS-Server causes trouble, to check this try the follwing.
 ```
 both ping must be work
 
-* consider low memory
+* consider low memory:
   with an amount lower than 8GB sonar and eleastic search did not startup
 
+* too many plugins to download:
+  You can do an "pre download of the plugins", see the readme.md at jenkins-fat direcory
 
   
 
