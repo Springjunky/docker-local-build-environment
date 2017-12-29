@@ -1,5 +1,5 @@
-ace-editor
 analysis-collector
+ace-editor
 analysis-core
 ansible
 ansicolor
@@ -77,11 +77,9 @@ jquery-ui
 jsch
 junit
 lastfailureversioncolumn
-lastsuccessdescriptioncolumn
 lastsuccessversioncolumn
 ldap
 m2release
-m2-repo-reaper
 mailer
 mapdb-api
 matrix-auth

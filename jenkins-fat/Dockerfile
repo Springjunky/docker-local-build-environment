@@ -93,25 +93,25 @@ COPY init.groovy /usr/share/jenkins/ref/init.groovy.d/tcp-slave-agent-port.groov
 # jenkins version being bundled in this docker image 
 # This is the latest stable version
 ARG JENKINS_VERSION
-ENV JENKINS_VERSION ${JENKINS_VERSION:-2.73.2}
+ENV JENKINS_VERSION ${JENKINS_VERSION:-2.89.2}
 
 #### jenkins.war checksum, download will be validated using it
-ARG JENKINS_SHA=1489e498f682e8b61ce4cf8124de200f264b087c
+ARG JENKINS_SHA=cf7be0af90e310a3232bcf1d6c80902788d5ebae
 
 ARG JENKINS_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war
 
 # could use ADD but this one does not check Last-Modified header neither does it allow to control checksum 
 # see https://github.com/docker/docker/issues/8331
-RUN curl -fsSL ${JENKINS_URL} -o /usr/share/jenkins/jenkins.war && echo "${JENKINS_SHA}  /usr/share/jenkins/jenkins.war" | sha1sum -c -
+# RUN curl -fsSL ${JENKINS_URL} -o /usr/share/jenkins/jenkins.war && echo "${JENKINS_SHA}  /usr/share/jenkins/jenkins.war" | sha1sum -c -
 
 #------------------ Optional lokal caching of files
 # Download jenkins with yout favorite browser and put the war in the current dir. 
-#COPY jenkins-war-2.73.2.war /usr/share/jenkins/jenkins.war
+COPY jenkins-war-2.89.2.war /usr/share/jenkins/jenkins.war
 ###### # Copy all Cached plugins ...
 # to preLoad all Plugins listed in active-plugins.txt use the command
 #  ./preDownload.sh $(cat active-plugins.txt)
 # this will download all the plugins in th Folder Plugins
-# COPY Plugins/* /usr/share/jenkins/ref/plugins/
+COPY Plugins/* /usr/share/jenkins/ref/plugins/
 #------------------ Optional lokal caching of files end block
 
 ENV JENKINS_UC https://updates.jenkins.io

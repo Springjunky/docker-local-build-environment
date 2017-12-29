@@ -1,5 +1,5 @@
 #####################################
-# Don't touch this file is generated 
+# Don't touch this file is generated
 # expecilly for: HOSTNAME
 ###################################
 #
@@ -11,51 +11,34 @@ networks:
   devstacknetwork:
     driver: bridge
 
-services: 
+services:
+# ------------------------------------------------------------------------------
   ngnix:
      build: nginx-reverse
-     ports: 
-       - "80:80"       #http:// 
+     ports:
+       - "80:80"       #http://
        # SSH Bypassing into gitlab, if you want to change this edit nginx.conf also
        - "2222:2222"   #ssh port of gitlab (ssh://git@myhostname:2222/scott/foo.git)
        - "5555:5555"   #Gitlab Docker Registry do NOT use 5000, this is an internal PORT of the gitlab-ce Image
      networks:
        - devstacknetwork
+
+# ------------------------------------------------------------------------------
   jenkins-fat:
     build: jenkins-fat
-    dns: DNS_SERVER
+    extra_hosts:
+      - HOSTNAME:HOSTIP
     networks:
       - devstacknetwork
     volumes:
-      - BASE_DATA_DIR/jenkins:/var/jenkins_home 
+      - BASE_DATA_DIR/jenkins:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-  sonar-db:
-    image: postgres
-    environment:
-      - POSTGRES_USER=sonar
-      - POSTGRES_PASSWORD=sonar
-    volumes:
-      - BASE_DATA_DIR/sonar-db/postgresql:/var/lib/postgresql
-      # This needs explicit mapping due to 
-      # https://github.com/docker-library/postgres/blob/4e48e3228a30763913ece952c611e5e9b95c8759/Dockerfile.template#L52
-      - BASE_DATA_DIR/sonar-db/postgresql_data:/var/lib/postgresql/data
-    networks:
-       - devstacknetwork
-  sonar:
-    image: sonarqube
-    dns: DNS_SERVER
-    networks:
-       - devstacknetwork
-    environment:
-      - SONARQUBE_JDBC_URL=jdbc:postgresql://sonar-db:5432/sonar
-    volumes:
-      - BASE_DATA_DIR/sonar/sonarqube_conf:/opt/sonarqube/conf
-      - BASE_DATA_DIR/sonar/sonarqube_data:/opt/sonarqube/data
-      - BASE_DATA_DIR/sonar/sonarqube_extensions:/opt/sonarqube/extensions
-      - BASE_DATA_DIR/sonar/sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
+
+# ------------------------------------------------------------------------------
   gitlab:
     image: 'gitlab/gitlab-ce:latest'
-    dns: DNS_SERVER
+    extra_hosts:
+      - HOSTNAME:HOSTIP
     networks:
       - devstacknetwork
     environment:
@@ -79,14 +62,25 @@ services:
       - BASE_DATA_DIR/gitlab/config:/etc/gitlab
       - BASE_DATA_DIR/gitlab/logs:/var/log/gitlab
       - BASE_DATA_DIR/gitlab/data:/var/opt/gitlab
-  
+# ------------------------------------------------------------------------------
+  nexus:
+    image: sonatype/nexus3
+    extra_hosts:
+      - HOSTNAME:HOSTIP
+    networks:
+      - devstacknetwork
+    environment:
+      - NEXUS_CONTEXT=nexus
+    volumes:
+      - BASE_DATA_DIR/nexus:/nexus-data
+
+# ------------------------------------------------------------------------------
   gitlabrunner:
     build: gitlabrunner
-    dns: DNS_SERVER
-    networks:
-       - devstacknetwork
+    network_mode: "host"
+    extra_hosts:
+      - HOSTNAME:HOSTIP
     environment:
-      - DOCKER_DNS=DNS_SERVER
       - GITLAB_URL=http://HOSTNAME/gitlab
       - REGISTER_TOKEN=s3cretToken4Runner
       - REGISTER_MODE=FRESH #KEEP register a new runner an keep it. FRESH unregister all runners and always install a new (pipeline-history lost!)
@@ -94,14 +88,3 @@ services:
     volumes:
       - BASE_DATA_DIR/gitlab-runner/config:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock
-  nexus:
-    image: sonatype/nexus3
-    dns: DNS_SERVER
-    networks:
-       - devstacknetwork
-    environment:
-      - NEXUS_CONTEXT=nexus
-    volumes:
-      - BASE_DATA_DIR/nexus:/nexus-data   
-      
-  

@@ -1,8 +1,8 @@
 ## docker-local-build-environment
 
-##### Tired of endless installation and configuration .... ?! 
+##### Tired of endless installation and configuration .... ?!
 
-My personal solution is a local Build Environment with Jenkins, Gitlab, Sonar and Nexus; ready in a few minutes.
+My personal solution is a local Build Environment with Jenkins, Gitlab, (Sonar) and Nexus; ready in a few minutes.
 Your own lokal, personal, continous build enviroment (maybe in future releases I just call it lpcbe).
 
 ### System requirements
@@ -15,13 +15,13 @@ Bring up your own build environment ... just do a
 ```
    git clone https://github.com/Springjunky/docker-local-build-environment.git
    cd docker-local-build-environment
-   sudo ./prepareCompose.sh 
+   sudo ./prepareCompose.sh
    docker-compose up --build -d
-   docker-compose logs 
+   docker-compose logs
 ```
 ### The first startup takes a long time (especially gitlab), so be patient
 
-open your favorite browser (_not_ at localhost, use the $(hostname)/jenkins ) 
+open your favorite browser (_not_ at localhost, use the $(hostname)/jenkins )
 to prevent jenkins spit out "your reverse proxy is wrong")
 
 ### Ready !
@@ -29,9 +29,11 @@ to prevent jenkins spit out "your reverse proxy is wrong")
 Now you are ready to go with a little CI/CD Environment:
 ```
  Jenkins  http://<your-host-name>/jenkins
- Sonar  http://<your-host-name>/sonar
  Nexus  http://<your-host-name>/nexus
  Gitlab  http://<your-host-name>/gitlab
+ in the next Release:  Sonar  http://<your-host-name>/sonar
+
+
 ```
 #### Security
 ... not really, its all http .. don't worry about it! It's only local communication
@@ -65,11 +67,11 @@ iptables -N EXTERNAL-ACCESS-DENY
 iptables -A EXTERNAL-ACCESS-DENY -j LOG --log-prefix "DCKR-EXT-ACCESS-DENY:" --log-level 6
 iptables -A EXTERNAL-ACCESS-DENY -j DROP
 
-# Block all incomming traffic for docker 
+# Block all incomming traffic for docker
 iptables -A DOCKER-USER -i $EXTERNAL_INTERFACE \
          -p tcp --match multiport \
          --dports $PORTS_TO_BLOCK \
-         -j EXTERNAL-ACCESS-DENY 
+         -j EXTERNAL-ACCESS-DENY
 
 # Restore default rule to return all the rest back to the FORWARD-Chain
 iptables -A DOCKER-USER -j RETURN
@@ -100,11 +102,11 @@ echo "See logs with prefix DCKR-EXT-ACCESS-DENY:"
 
 ###  Giltab
 
-* the docker-registry is at port 5555 (and secured with an openssl certificate ..thats part of 
-  prepareCompose.sh), just create a project in gitlab and click at the  registry tab to show 
+* the docker-registry is at port 5555 (and secured with an openssl certificate ..thats part of
+  prepareCompose.sh), just create a project in gitlab and click at the  registry tab to show
   how to login to the project registry and how to tag your images
 * ssh cloning and pushing is at port 2222
- 
+
 #### gitlab-runner
 The runner is a gitlab-multirunner image with a docker-runner (concurrent=1) , based on [gitlab/gitlab-runner][2]  The docker-compose section has an environment called
 REGISTER_MODE, it can set to KEEP or REFRESH
@@ -120,7 +122,7 @@ It takes a long time until gitlab is ready to accept a runner registration, if i
 Gitlab is very very fast with new releases and sometimes the api has breaking changes. If something does not work take a look at the Jenkins Bugtracker.
 
 ### Sonar
-You need to install some rules (Administration - System - Update Center - Available - Search: Java)
+In future releases Sonar will be added...(You need to install some rules (Administration - System - Update Center - Available - Search: Java)
 
 ### Nexus
 Some ToDo for me described here
@@ -132,15 +134,19 @@ And _yes_ docker-plugin in jenkins works (docker in docker, usefull but not reco
 
 ## Troubleshooting
 
-In most cases a wrong DNS-Server causes trouble, to check this try the follwing.
+In most cases a wrong HOSTNAME:HOSTIP causes trouble, to check this try the follwing.
 * log into the sonarcube container (with id)
 ```
   docker container ls
-  docker container exec -it <your id> bash
+  docker container exec -it dockerlocalbuildenvironment_jenkins-fat_1 bash
+  apt-get update
+  apt-get install -y --allow-unauthenticated iputils-ping
   ping google.de
   ping jenkins-fat
+  ping gitlab
+  ping <your local hostname>
 ```
-both ping must be work
+every ping must work, if not, check extra_hosts in compose-file
 
 * consider low memory:
   with an amount lower than 8GB sonar and eleastic search did not startup
@@ -148,7 +154,7 @@ both ping must be work
 * too many plugins to download:
   You can do an "pre download of the plugins", see the readme.md at jenkins-fat direcory
 
-  
+Docker-Networing insider docker-compose causes the parameter    
 
 ### My next steps
 
@@ -157,6 +163,7 @@ both ping must be work
 * ~~install docker-compose~~
 * ~~install ansible~~
 * ~~apply a gitlab runner~~
+* apply sonar
 * apply git-lfs
 
 

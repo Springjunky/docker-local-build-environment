@@ -38,7 +38,8 @@ if test $REGISTER_MODE = "FRESH" -o  $RUNNER_IS_PRESENT -ne 0 ; then
       gitlab-runner register -n --url=${GITLAB_URL} --registration-token=${REGISTER_TOKEN} \
       --executor=docker --name=docker-multi-runner \
       --run-untagged=true --locked=false --docker-image=docker:latest \
-      --docker-privileged 
+      --docker-privileged \
+      --docker-extra-hosts="jarvis:192.168.34.98"
       REGISTERED=$?
       if [ $REGISTERED -ne 0 ] ; then
         echo "${GITLAB_URL} not ready $TRYS trys left, next try in 10 second for ${GITLAB_URL}"  
@@ -52,9 +53,10 @@ if test $REGISTER_MODE = "FRESH" -o  $RUNNER_IS_PRESENT -ne 0 ; then
         gitlab-runner verify --delete
         sleep 1
         gitlab-runner register -n --url=${GITLAB_URL} --registration-token=${REGISTER_TOKEN} \
-        --executor=docker --name=docker--multi-runner \
+        --executor=docker --name=docker-multi-runner \
         --run-untagged=true --locked=false --docker-image=docker:latest \
-        --docker-privileged 
+        --docker-privileged \
+        --docker-extra-hosts="jarvis:192.168.34.98"
       fi
    done  
 fi
