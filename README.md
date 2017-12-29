@@ -88,7 +88,6 @@ echo "See logs with prefix DCKR-EXT-ACCESS-DENY:"
 |Image  |  User  |  Password |
 |---|---|---|
 |Jenkins| admin| admin |
-|Sonar|admin|admin|
 |Nexus   | admin | admin123 |
 |Gitlab  | root  | gitlab4me |
 
@@ -135,7 +134,7 @@ And _yes_ docker-plugin in jenkins works (docker in docker, usefull but not reco
 ## Troubleshooting
 
 In most cases a wrong HOSTNAME:HOSTIP causes trouble, to check this try the follwing.
-* log into the sonarcube container (with id)
+* log into the jenkins-fat container (with id)
 ```
   docker container ls
   docker container exec -it dockerlocalbuildenvironment_jenkins-fat_1 bash
