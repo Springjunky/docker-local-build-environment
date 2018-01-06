@@ -9,7 +9,7 @@ echo "Prepare compose file and directorys"
 
 USER_DATA_DIR=$HOME/devstack-data
 HOSTNAME=$(hostname)
-HOSTIP=$(hostname -i)
+HOSTIP=$(hostname -I | awk '{print $1}' )
 
 
 echo "########################################################################"
@@ -24,7 +24,10 @@ read -e -p "Your hostname (hit return if $HOSTNAME is correct) : " -i $HOSTNAME 
 echo "Setting HOSTNAME to $GIVEN_HOSTNAME"
 HOSTNAME=$GIVEN_HOSTNAME
 
-read -e -p "Your hostIP  (hit return if $HOSTIP is correct) : " -i $HOSTIP GIVEN_HOSTIP
+echo "Type your hostIP, I guess it is one of $(hostname -I) "
+echo "Remember, 127.0.0.1 is NOT the correct IP and the docker-Network starts with 172.x.y.z"
+ 
+read -e -p "Your hostIP  : " -i $HOSTIP GIVEN_HOSTIP
 HOSTIP=$GIVEN_HOSTIP
 
 type openssl 2>/dev/null
