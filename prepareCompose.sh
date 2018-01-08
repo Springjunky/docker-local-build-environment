@@ -25,11 +25,12 @@ echo "Setting HOSTNAME to $GIVEN_HOSTNAME"
 HOSTNAME=$GIVEN_HOSTNAME
 
 echo "Type your hostIP, I guess it is one of $(hostname -I) "
-echo "Remember, 127.0.0.1 is NOT the correct IP and the docker-Network starts with 172.x.y.z"
- 
+echo "Remember, 127.0.0.1 is NOT the correct IP and the docker-Network starts with 172.x.y.z and is also not correct"
+
 read -e -p "Your hostIP  : " -i $HOSTIP GIVEN_HOSTIP
 HOSTIP=$GIVEN_HOSTIP
-
+echo "Setting HOSTIP to $GIVEN_HOSTIP"
+echo " "
 type openssl 2>/dev/null
 if [ $? -eq 0 ] ; then
   echo "openssl installed :-)"
@@ -95,6 +96,11 @@ cp -r preconfig/jenkins/* $USER_DATA_DIR/jenkins/
 sed s#BASE_DATA_DIR#${USER_DATA_DIR}#g docker-compose.yml.template > docker-compose.yml
 sed -i s#HOSTIP#${HOSTIP}#g docker-compose.yml
 sed -i s#HOSTNAME#${HOSTNAME}#g docker-compose.yml
+
+# Gitlabrunner needs extra_hosts to clone stuff via hostname
+sed -i s#HOSTNAME#${HOSTNAME}#g gitlabrunner/entrypointAutoregister
+sed -i s#HOSTIP#${HOSTIP}#g gitlabrunner/entrypointAutoregister
+
 chmod a+rw docker-compose.yml
 echo "-------------------------------------------------------------------------------------------"
 echo "-------------------------------------------------------------------------------------------"

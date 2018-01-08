@@ -32,17 +32,17 @@ fi
 TRYS=$REGISTER_TRYS
 REGISTERED=1
 
-if test $REGISTER_MODE = "FRESH" -o  $RUNNER_IS_PRESENT -ne 0 ; then 
+if test $REGISTER_MODE = "FRESH" -o  $RUNNER_IS_PRESENT -ne 0 ; then
     while test $TRYS -gt 0 -a $REGISTERED -gt 0 ; do
       TRYS=$(expr $TRYS - 1)
       gitlab-runner register -n --url=${GITLAB_URL} --registration-token=${REGISTER_TOKEN} \
       --executor=docker --name=docker-multi-runner \
       --run-untagged=true --locked=false --docker-image=docker:latest \
       --docker-privileged \
-      --docker-extra-hosts="jarvis:192.168.34.98"
+      --docker-extra-hosts="HOSTNAME:HOSTIP"
       REGISTERED=$?
       if [ $REGISTERED -ne 0 ] ; then
-        echo "${GITLAB_URL} not ready $TRYS trys left, next try in 10 second for ${GITLAB_URL}"  
+        echo "${GITLAB_URL} not ready $TRYS trys left, next try in 10 second for ${GITLAB_URL}"
         sleep 10
       else
         # Gitlab is ready, so remove ALL runner and re-registrer only one runner
@@ -56,9 +56,9 @@ if test $REGISTER_MODE = "FRESH" -o  $RUNNER_IS_PRESENT -ne 0 ; then
         --executor=docker --name=docker-multi-runner \
         --run-untagged=true --locked=false --docker-image=docker:latest \
         --docker-privileged \
-        --docker-extra-hosts="jarvis:192.168.34.98"
+        --docker-extra-hosts="HOSTNAME:HOSTIP"
       fi
-   done  
+   done
 fi
 
 # launch gitlab-ci-multi-runner passing all arguments
