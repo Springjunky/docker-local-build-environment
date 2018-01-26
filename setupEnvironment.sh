@@ -5,7 +5,7 @@ if [ $(id -u) -gt 0 ] ;then
     exit 1
 fi
 
-echo "Prepare compose file and directorys"
+echo "Prepare .env for compose file and directorys"
 
 USER_DATA_DIR=$HOME/devstack-data
 HOSTNAME=$(hostname)
@@ -75,10 +75,10 @@ else
   exit 1
 fi
 
-if [ -f docker-compose.yml ]; then
-  FILE_NAME=docker-compose.yml-$(date +"%F-%H-%M-%S-%N")
-  cp docker-compose.yml $FILE_NAME
-  echo "previous docker-compose.yml saved as $FILE_NAME"
+if [ -f .env ]; then
+  FILE_NAME=.env-$(date +"%F-%H-%M-%S-%N")
+  cp .env $FILE_NAME
+  echo "previous .env saved as $FILE_NAME"
 fi
 # Copy preconfigs to host-volumes
 # sonar.properties
@@ -92,19 +92,27 @@ fi
 #Copy predefined Jobs and Configs
 cp -r preconfig/jenkins/* $USER_DATA_DIR/jenkins/
 
-# Set the right volume-names, hostname and host_ip in docker-compose.yml
-sed s#BASE_DATA_DIR#${USER_DATA_DIR}#g docker-compose.yml.template > docker-compose.yml
-sed -i s#HOSTIP#${HOSTIP}#g docker-compose.yml
-sed -i s#HOSTNAME#${HOSTNAME}#g docker-compose.yml
+# Set the right volume-names, hostname and host_ip in .env for docker-compose.yml
+echo "---------- generating .env file for docker-compose.yml "
+cat .env.template > .env
+echo "DC_HOSTNAME=${HOSTNAME}" >> .env
+echo "DC_HOSTIP=${HOSTIP}" >> .env
+echo "DC_BASE_DATA_DIR=${USER_DATA_DIR}" >> .env
+echo "---------- genarated file  ---------------------------- "
+cat .env
+echo "-------------------------------------------------------------------------------------------"
 
-# Gitlabrunner needs extra_hosts to clone stuff via hostname
-sed -i s#HOSTNAME#${HOSTNAME}#g gitlabrunner/entrypointAutoregister
-sed -i s#HOSTIP#${HOSTIP}#g gitlabrunner/entrypointAutoregister
+#sed s#BASE_DATA_DIR#${USER_DATA_DIR}#g docker-compose.yml.template > docker-compose.yml
+#sed -i s#HOSTIP#${HOSTIP}#g docker-compose.yml
+#sed -i s#HOSTNAME#${HOSTNAME}#g docker-compose.yml
 
-chmod a+rw docker-compose.yml
+# Gitlabrunner needs extra_hosts to clone stuff via (outside) hostname
+# sed -i s#HOSTNAME#${HOSTNAME}#g gitlabrunner/entrypointAutoregister
+# sed -i s#HOSTIP#${HOSTIP}#g gitlabrunner/entrypointAutoregister
+
 echo "-------------------------------------------------------------------------------------------"
 echo "-------------------------------------------------------------------------------------------"
-echo "docker-compose.yml created"
+echo "Evironment for docker-compose.yml created"
 echo "run "
 echo "docker-compose up --build -d "
 echo "docker-compose logs -f"

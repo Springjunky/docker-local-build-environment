@@ -1,9 +1,9 @@
 #####################################
 # Don't touch this file is generated
-# expecilly for: HOSTNAME
+# expecilly for: ${DC_HOSTNAME}
 ###################################
 #
-# Consider to Backup  BASE_DATA_DIR
+# Consider to Backup  ${DC_BASE_DATA_DIR}
 #
 version: "3"
 
@@ -18,7 +18,7 @@ services:
      ports:
        - "80:80"       #http://
        # SSH Bypassing into gitlab, if you want to change this edit nginx.conf also
-       - "2222:2222"   #ssh port of gitlab (ssh://git@myhostname:2222/scott/foo.git)
+       - "2222:2222"   #ssh port of gitlab (ssh://git@myHOST:2222/scott/foo.git)
        - "5555:5555"   #Gitlab Docker Registry do NOT use 5000, this is an internal PORT of the gitlab-ce Image
      networks:
        - devstacknetwork
@@ -27,64 +27,65 @@ services:
   jenkins-fat:
     build: jenkins-fat
     extra_hosts:
-      - HOSTNAME:HOSTIP
+      - ${DC_HOSTNAME}:${DC_HOSTIP}
     networks:
       - devstacknetwork
     volumes:
-      - BASE_DATA_DIR/jenkins:/var/jenkins_home
+      - ${DC_BASE_DATA_DIR}/jenkins:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
 
 # ------------------------------------------------------------------------------
   gitlab:
     image: 'gitlab/gitlab-ce:latest'
     extra_hosts:
-      - HOSTNAME:HOSTIP
+      - ${DC_HOSTNAME}:${DC_HOSTIP}
     networks:
       - devstacknetwork
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://HOSTNAME/gitlab'
+        external_url 'http://${DC_HOSTNAME}/gitlab'
         gitlab_rails['initial_root_password'] = "gitlab4me"
         gitlab_rails['initial_shared_runners_registration_token'] = "s3cretToken4Runner"
         gitlab_rails['gitlab_shell_ssh_port'] = 2222
         # docker-registry config
-        registry_external_url 'https://HOSTNAME:5555'
+        registry_external_url 'https://${DC_HOSTNAME}:5555'
         registry_nginx['listen_port'] = 5555
         registry_nginx['listen_https'] = true
         # SSL config just for the docker-registry need
-        nginx['ssl_certificate'] = "/etc/gitlab/ssl/HOSTNAME.crt"
-        nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/HOSTNAME.key"
+        nginx['ssl_certificate'] = "/etc/gitlab/ssl/${DC_HOSTNAME}.crt"
+        nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/${DC_HOSTNAME}.key"
         registry_nginx['proxy_set_headers'] = {
         "X-Forwarded-Proto" => "https",
         "X-Forwarded-Ssl" => "on"
         }
     volumes:
-      - BASE_DATA_DIR/gitlab/config:/etc/gitlab
-      - BASE_DATA_DIR/gitlab/logs:/var/log/gitlab
-      - BASE_DATA_DIR/gitlab/data:/var/opt/gitlab
+      - ${DC_BASE_DATA_DIR}/gitlab/config:/etc/gitlab
+      - ${DC_BASE_DATA_DIR}/gitlab/logs:/var/log/gitlab
+      - ${DC_BASE_DATA_DIR}/gitlab/data:/var/opt/gitlab
 # ------------------------------------------------------------------------------
   nexus:
     image: sonatype/nexus3
     extra_hosts:
-      - HOSTNAME:HOSTIP
+      - ${DC_HOSTNAME}:${DC_HOSTIP}
     networks:
       - devstacknetwork
     environment:
       - NEXUS_CONTEXT=nexus
     volumes:
-      - BASE_DATA_DIR/nexus:/nexus-data
+      - ${DC_BASE_DATA_DIR}/nexus:/nexus-data
 
 # ------------------------------------------------------------------------------
   gitlabrunner:
     build: gitlabrunner
     network_mode: "host"
     extra_hosts:
-      - HOSTNAME:HOSTIP
+      - ${DC_HOSTNAME}:${DC_HOSTIP}
     environment:
-      - GITLAB_URL=http://HOSTNAME/gitlab
+      - GITLAB_URL=http://${DC_HOSTNAME}/gitlab
+      - HOSTNAME=${DC_HOSTNAME}
+      - HOSTIP=${DC_HOSTIP}
       - REGISTER_TOKEN=s3cretToken4Runner
-      - REGISTER_MODE=FRESH #KEEP register a new runner an keep it. FRESH unregister all runners and always install a new (pipeline-history lost!)
       - REGISTER_TRYS=60 # every 10 seconds a try to register the runner..gitlab takes a long time to startup
     volumes:
-      - BASE_DATA_DIR/gitlab-runner/config:/etc/gitlab-runner
+      - ${DC_BASE_DATA_DIR}/gitlab-runner/config:/etc/gitlab-runner
       - /var/run/docker.sock:/var/run/docker.sock

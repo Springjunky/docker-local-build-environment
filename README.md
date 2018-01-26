@@ -2,8 +2,10 @@
 
 ##### Tired of endless installation and configuration .... ?!
 
-My personal solution is a local Build Environment with Jenkins, Gitlab, (Sonar) and Nexus; ready in a few minutes.
+My personal solution is a local Build Environment with Jenkins, Gitlab / Gitlabrunner, (Sonar) and Nexus; ready in a few minutes.
 Your own lokal, personal, continous build enviroment (maybe in future releases I just call it lpcbe).
+
+# This is NOT for any cluster (Swarm / Kubernetes)
 
 ### System requirements
 * At least 8GB Memory with 3GB Swap and 10GB Disk-Space
@@ -15,7 +17,7 @@ Bring up your own build environment ... just do a
 ```
    git clone https://github.com/Springjunky/docker-local-build-environment.git
    cd docker-local-build-environment
-   sudo ./prepareCompose.sh
+   sudo ./setupEnvironment.sh
    docker-compose up --build -d
    docker-compose logs
 ```
@@ -39,7 +41,7 @@ Now you are ready to go with a little CI/CD Environment:
 ... not really, its all http .. don't worry about it! It's only local communication
 
 ##### security paranoia
-All the exposed ports are reachable from outer world because docker creates and deletes dynamically FORWARD rules with default policy ACCEPT on startup / shutdown containers wich have exported ports.
+All the exposed ports are reachable from outer world because docker creates and deletes dynamically iptables FORWARD rules with default policy ACCEPT on startup / shutdown containers wich have exported ports.
 
 To deny acccess from outer world the DOCKER-USER Chain (since docker 17.06) ist the medium of choice for your own rules (this is the first target in the FORWARD-Chain and never touched by docker).
 
@@ -97,23 +99,19 @@ echo "See logs with prefix DCKR-EXT-ACCESS-DENY:"
 * MAVEN_HOME is /opt/maven
 * JAVA_HOME is /usr/lib/jvm/java-8-openjdk-amd64
 * Blue Ocean is installed and works perfect with a GitHUB Account, not GitLab ... sorry, this is Jenkins.
-  You need to be logged in to use Blue Ocean
+  You need to be logged as a jenkins-user in to use Blue Ocean
 
 ###  Giltab
 
-* the docker-registry is at port 5555 (and secured with an openssl certificate ..thats part of
-  prepareCompose.sh), just create a project in gitlab and click at the  registry tab to show
+* the docker-registry from GitLab is at port 5555 (and secured with an openssl certificate ..thats part of
+  prepareEnvironment.sh), just create a project in gitlab and click at the  registry tab to show
   how to login to the project registry and how to tag your images
 * ssh cloning and pushing is at port 2222
 
 #### gitlab-runner
-The runner is a gitlab-multirunner image with a docker-runner (concurrent=1) , based on [gitlab/gitlab-runner][2]  The docker-compose section has an environment called
-REGISTER_MODE, it can set to KEEP or REFRESH
-* KEEP register at one time a runner and keep it during startups
-* REFRESH at every startup remove all old runners and register one new runner (the pipeline-history ist lost.)
+The runner is a gitlab-multirunner image with a docker-runner (concurrent=1) , based on [gitlab/gitlab-runner][2]  at every startup any runner is removed and only ONE new runner ist registrated to avoid multiple runners  (the pipeline-history maybe lost.) docker-in-docker works :-)
 
-It takes a long time until gitlab is ready to accept a runner registration, if it fails, increase the REGISTER_TRYS
-
+It takes a long time until gitlab is ready to accept a runner registration, if it fails, increase the REGISTER_TRYS in docker-compse.yml
 
 
 #### Jenkins and Gitlab
