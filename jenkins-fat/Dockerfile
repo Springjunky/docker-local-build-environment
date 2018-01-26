@@ -1,4 +1,4 @@
-FROM ubuntu:17.04
+FROM ubuntu:17.10
 ENV DEBIAN_FRONTEND noninteractive
 ENV JAVA_VERSION=8 \
     JAVA_UPDATE=131 \
