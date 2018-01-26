@@ -1,4 +1,5 @@
 docker-compose.yml-*
 *.jpi
 *.war
+.env-*
 .env

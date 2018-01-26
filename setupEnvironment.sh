@@ -31,6 +31,19 @@ read -e -p "Your hostIP  : " -i $HOSTIP GIVEN_HOSTIP
 HOSTIP=$GIVEN_HOSTIP
 echo "Setting HOSTIP to $GIVEN_HOSTIP"
 echo " "
+echo "Number of plugins to download for Jenkins (S)uggessted (72 Plugin)"
+echo "                                          (M)uch more (146 Plugins)"
+PLUGINS=S
+read -e -p "Choose S or M : " -i $PLUGINS GIVEN_PLUGINS
+if  [ "$GIVEN_PLUGINS" == "S" ] ; then
+  echo "using suggested plugins"
+  cp jenkins-fat/suggested-plugins.txt jenkins-fat/active-plugins.txt 
+else
+  echo "using a lot lot lot of more plugins"
+  cp jenkins-fat/max-plugins.txt jenkins-fat/active-plugins.txt 
+fi  
+chmod a+rw jenkins-fat/active-plugins.txt 
+
 type openssl 2>/dev/null
 if [ $? -eq 0 ] ; then
   echo "openssl installed :-)"

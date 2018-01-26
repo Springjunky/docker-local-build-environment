@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y docker-ce
 #--------------------------------------------
 #------------ Docker Compose
 #--------------------------------------------
-RUN curl -o /usr/bin/docker-compose -L "https://github.com/docker/compose/releases/download/1.16.1/docker-compose-$(uname -s)-$(uname -m)" \
+RUN curl -o /usr/bin/docker-compose -L "https://github.com/docker/compose/releases/download/1.18.0/docker-compose-$(uname -s)-$(uname -m)" \
     && chmod +x /usr/bin/docker-compose
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
@@ -52,16 +52,16 @@ ENV GIT_SSL_NO_VERIFY=1
 #----------------------------------------
 #  install Maven
 #----------------------------------------
-# get maven 3.2.0
-RUN wget --no-verbose -O /tmp/apache-maven-3.2.5.tar.gz http://archive.apache.org/dist/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
+# get maven 3.5.2
+RUN wget --no-verbose -O /tmp/apache-maven-3.5.2.tar.gz http://archive.apache.org/dist/maven/maven-3/3.5.2/binaries/apache-maven-3.5.2-bin.tar.gz
 # verify checksum
-RUN echo "b2d88f02bd3a08a9df1f0b0126ebd8dc /tmp/apache-maven-3.2.5.tar.gz" | md5sum -c
+RUN echo "948110de4aab290033c23bf4894f7d9a /tmp/apache-maven-3.5.2.tar.gz" | md5sum -c
 # install maven
-RUN tar xzf /tmp/apache-maven-3.2.5.tar.gz -C /opt/ && ln -s /opt/apache-maven-3.2.5 /opt/maven
+RUN tar xzf /tmp/apache-maven-3.5.2.tar.gz -C /opt/ && ln -s /opt/apache-maven-3.5.2 /opt/maven
 ENV MAVEN_HOME /opt/maven
 ENV PATH $MAVEN_HOME/bin:$JAVA_HOME/bin:$PATH
 
-RUN apt-get update && apt-get install -y  zip unzip && rm -rf /opt/java/src.zip && rm -rf /tmp/$filename && rm -f /tmp/apache-maven-3.2.5.tar.gz
+RUN apt-get update && apt-get install -y  zip unzip && rm -rf /opt/java/src.zip && rm -rf /tmp/$filename && rm -f /tmp/apache-maven-3.5.2.tar.gz
 #------------------------------
 # install Jenkins
 #------------------------------
@@ -93,10 +93,10 @@ COPY init.groovy /usr/share/jenkins/ref/init.groovy.d/tcp-slave-agent-port.groov
 # jenkins version being bundled in this docker image
 # This is the latest stable version
 ARG JENKINS_VERSION
-ENV JENKINS_VERSION ${JENKINS_VERSION:-2.89.2}
+ENV JENKINS_VERSION ${JENKINS_VERSION:-2.89.3}
 
 #### jenkins.war checksum, download will be validated using it
-ARG JENKINS_SHA=cf7be0af90e310a3232bcf1d6c80902788d5ebae
+ARG JENKINS_SHA=80d9a44198195f70218867086759c108821ca0ce
 
 ARG JENKINS_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war
 
@@ -104,7 +104,7 @@ ARG JENKINS_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-w
 # see https://github.com/docker/docker/issues/8331
 RUN curl -fsSL ${JENKINS_URL} -o /usr/share/jenkins/jenkins.war && echo "${JENKINS_SHA}  /usr/share/jenkins/jenkins.war" | sha1sum -c -
 
-#------------------ Optional lokal caching of files
+#------------------ Optional local caching of files
 # Download jenkins with yout favorite browser and put the war in the current dir.
 # COPY jenkins-war-2.89.2.war /usr/share/jenkins/jenkins.war
 ###### # Copy all Cached plugins ...
