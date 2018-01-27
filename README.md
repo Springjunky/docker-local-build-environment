@@ -5,7 +5,7 @@
 My personal solution is a local Build Environment with Jenkins, Gitlab / Gitlabrunner, (Sonar) and Nexus; ready in a few minutes.
 Your own lokal, personal, continous build enviroment (maybe in future releases I just call it lpcbe).
 
-# This is NOT for any cluster (Swarm / Kubernetes)
+#### This is NOT for any cluster (Swarm / Kubernetes)
 
 ### System requirements
 * At least 8GB Memory with 3GB Swap and 10GB Disk-Space
@@ -34,14 +34,12 @@ Now you are ready to go with a little CI/CD Environment:
  Nexus  http://<your-host-name>/nexus
  Gitlab  http://<your-host-name>/gitlab
  in the next Release:  Sonar  http://<your-host-name>/sonar
-
-
 ```
 #### Security
 ... not really, its all http .. don't worry about it! It's only local communication
 
 ##### security paranoia
-All the exposed ports are reachable from outer world because docker creates and deletes dynamically iptables FORWARD rules with default policy ACCEPT on startup / shutdown containers wich have exported ports.
+All the exposed ports are reachable from outer world because docker creates and deletes dynamically iptables FORWARD rules with default policy ACCEPT on startup/shutdown containers wich have exported ports.
 
 To deny acccess from outer world the DOCKER-USER Chain (since docker 17.06) ist the medium of choice for your own rules (this is the first target in the FORWARD-Chain and never touched by docker).
 
@@ -98,8 +96,8 @@ echo "See logs with prefix DCKR-EXT-ACCESS-DENY:"
 
 * MAVEN_HOME is /opt/maven
 * JAVA_HOME is /usr/lib/jvm/java-8-openjdk-amd64
-* Blue Ocean is installed and works perfect with a GitHUB Account, not GitLab ... sorry, this is Jenkins.
-  You need to be logged as a jenkins-user in to use Blue Ocean
+* Blue Ocean is installed if you choose (M)uch mor plugins and works perfect with a GitHUB Account, not GitLab ... sorry, this is Jenkins.
+  You need to be logged as a jenkins-user to use Blue Ocean
 
 ###  Giltab
 
@@ -151,7 +149,6 @@ every ping must work, if not, check extra_hosts in compose-file
 * too many plugins to download:
   You can do an "pre download of the plugins", see the readme.md at jenkins-fat direcory
 
-Docker-Networing insider docker-compose causes the parameter    
 
 ### My next steps
 
@@ -160,8 +157,9 @@ Docker-Networing insider docker-compose causes the parameter
 * ~~install docker-compose~~
 * ~~install ansible~~
 * ~~apply a gitlab runner~~
+* ~~apply git-lfs~~
 * apply sonar
-* apply git-lfs
+* apply a better registry
 
 
 
