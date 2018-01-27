@@ -1,5 +1,9 @@
 #!/bin/bash
 
+function pause(){
+   read -p "Press [Enter] key to continue..."
+}
+
 if [ $(id -u) -gt 0 ] ;then
     echo "Use sudo $0 "
     exit 1
@@ -14,11 +18,13 @@ HOSTIP=$(hostname -I | awk '{print $1}' )
 
 echo "########################################################################"
 echo "Verify your hostname and the ip is correct, if this is wrong the  "
-echo "container network ist not able to lookup the host $(hostname) by name "
+echo "container network ist not able to lookup the host \"$(hostname) \" by name "
 echo "it's a docker-Feature !!"
 echo "the \"routing \" ist out of container an back into the nginx and forward to container:-)       "
 echo " and 8.8.8.8 (Google Nameserver) does not known your internal hostname  "
 echo "########################################################################"
+
+pause
 
 read -e -p "Your hostname (hit return if $HOSTNAME is correct) : " -i $HOSTNAME GIVEN_HOSTNAME
 echo "Setting HOSTNAME to $GIVEN_HOSTNAME"
@@ -31,18 +37,31 @@ read -e -p "Your hostIP  : " -i $HOSTIP GIVEN_HOSTIP
 HOSTIP=$GIVEN_HOSTIP
 echo "Setting HOSTIP to $GIVEN_HOSTIP"
 echo " "
-echo "Number of plugins to download for Jenkins (S)uggessted (72 Plugin)"
-echo "                                          (M)uch more (146 Plugins)"
+echo "Choose your weapons: Number of plugins to download for Jenkins "
+echo "  (L)et _ME_ choose (0 Plugins)"
+echo "  (S)uggested (72 Plugins)"
+echo "  (M)uch more (146 Plugins)"
 PLUGINS=S
 read -e -p "Choose S or M : " -i $PLUGINS GIVEN_PLUGINS
-if  [ "$GIVEN_PLUGINS" == "S" ] ; then
-  echo "using suggested plugins"
-  cp jenkins-fat/suggested-plugins.txt jenkins-fat/active-plugins.txt 
-else
-  echo "using a lot lot lot of more plugins"
-  cp jenkins-fat/max-plugins.txt jenkins-fat/active-plugins.txt 
-fi  
+
+case $GIVEN_PLUGINS in 
+      "L")
+      echo "Choose your own weapons (Jenkins will ask...you choose)"
+      > jenkins-fat/active-plugins.txt
+      ;;
+      "S")
+      echo "Jenkins will ask you, just say OK to use suggested plugins"
+      cp jenkins-fat/suggested-plugins.txt jenkins-fat/active-plugins.txt 
+      ;;
+      "M")
+      echo "Jenkins will ask you, just say OK to use tons of plugins"
+      cp jenkins-fat/max-plugins.txt jenkins-fat/active-plugins.txt 
+      ;;
+esac
+
 chmod a+rw jenkins-fat/active-plugins.txt 
+
+pause
 
 type openssl 2>/dev/null
 if [ $? -eq 0 ] ; then
@@ -61,7 +80,9 @@ mkdir -p $USER_DATA_DIR/nexus
 chown -R 200 $USER_DATA_DIR/nexus
 #----------------------------------
 
-echo "Create a self-signed certificate for your host: $HOSTNAME to "
+echo "Create a self-signed certificate for your host: $HOSTNAME to prevent docker complaining unsecure (gitlab) registry "
+pause
+
 if [ -f $USER_DATA_DIR/gitlab/config/ssl/$(hostname).key ]; then
   FILE_NAME=$USER_DATA_DIR/gitlab/config/ssl/$(hostname).key-$(date +"%F-%H-%M-%S-%N")
   cp $USER_DATA_DIR/gitlab/config/ssl/$(hostname).key $USER_DATA_DIR/gitlab/config/ssl/$(hostname).key-$(date +"%F-%H-%M-%S-%N")
@@ -83,6 +104,7 @@ if [ $? -eq 0 ] ;then
   echo "----------- Your certificate used by Gitlab docker-registry@${HOSTNAME} -------------------"
   openssl x509 -in $USER_DATA_DIR/gitlab/config/ssl/$(hostname).crt -text | head -15
   echo "-------------------------------------------------------------------------------------------"
+  pause
 else
   echo "NO CERT GENERATED "
   exit 1
@@ -111,27 +133,32 @@ cat .env.template > .env
 echo "DC_HOSTNAME=${HOSTNAME}" >> .env
 echo "DC_HOSTIP=${HOSTIP}" >> .env
 echo "DC_BASE_DATA_DIR=${USER_DATA_DIR}" >> .env
-echo "---------- genarated file  ---------------------------- "
+echo "---------- generated file  ---------------------------- "
 cat .env
 echo "-------------------------------------------------------------------------------------------"
-
-#sed s#BASE_DATA_DIR#${USER_DATA_DIR}#g docker-compose.yml.template > docker-compose.yml
-#sed -i s#HOSTIP#${HOSTIP}#g docker-compose.yml
-#sed -i s#HOSTNAME#${HOSTNAME}#g docker-compose.yml
-
-# Gitlabrunner needs extra_hosts to clone stuff via (outside) hostname
-# sed -i s#HOSTNAME#${HOSTNAME}#g gitlabrunner/entrypointAutoregister
-# sed -i s#HOSTIP#${HOSTIP}#g gitlabrunner/entrypointAutoregister
+echo "If something changed (your IP / hostname ... ) just edit the .env or rerun the script."
 
 echo "-------------------------------------------------------------------------------------------"
 echo "-------------------------------------------------------------------------------------------"
-echo "Evironment for docker-compose.yml created"
-echo "run "
-echo "docker-compose up --build -d "
-echo "docker-compose logs -f"
+echo "Environment for docker-compose.yml created"
+echo " "
 echo "use the following URL"
 BASE_URL="http://"$(hostname)"/"
 echo "Jenkins: ${BASE_URL}jenkins"
 ## echo "Sonar  : ${BASE_URL}sonar"
 echo "Nexus  : ${BASE_URL}nexus"
 echo "Gitlab : ${BASE_URL}gitlab"
+echo "Feel free to provide push-requests :-)"
+pause 
+echo " "
+
+echo "Setup finished, just type the following commands to start and see the logs of your environment"
+echo "docker-compose up --build -d "
+echo "docker-compose logs -f"
+
+
+
+
+
+
+
