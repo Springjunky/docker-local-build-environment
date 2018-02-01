@@ -2,7 +2,7 @@
 
 ##### Tired of endless installation and configuration .... ?!
 
-My personal solution is a local, Docker based CI/CD Build Environment ready in a few minutes to offer you a reade-to-use convinience plaground with
+My personal solution is a local, docker-based CI/CD Build Environment ready in a few minutes to offer you a reade-to-use convinience plaground with
 * Jenkins (with open-jdk-8, ansible, docker and maven inside)
 * Gitlab (with a docker based gitlab-runner registrated)
 * Nexus 3
