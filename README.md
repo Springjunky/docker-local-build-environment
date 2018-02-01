@@ -2,8 +2,12 @@
 
 ##### Tired of endless installation and configuration .... ?!
 
-My personal solution is a local Build Environment with Jenkins, Gitlab / Gitlabrunner, (Sonar) and Nexus; ready in a few minutes.
-Your own lokal, personal, continous build enviroment (maybe in future releases I just call it lpcbe).
+My personal solution is a local, Docker based CI/CD Build Environment ready in a few minutes to offer you a reade-to-use convinience plaground with
+* Jenkins (with open-jdk-8, ansible, docker and maven inside)
+* Gitlab (with a docker based gitlab-runner registrated)
+* Nexus 3
+* Sonar (in future releases..)
+
 
 #### This is NOT for any cluster (Swarm / Kubernetes)
 
