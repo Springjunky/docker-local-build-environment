@@ -17,6 +17,7 @@ My personal solution is a local, docker-based CI/CD Build Environment ready in a
 * docker-compose version >= 1.15.0
 
 ## Installation
+### without sonar
 Bring up your own build environment ... just do a
 ```
    git clone https://github.com/Springjunky/docker-local-build-environment.git
@@ -25,6 +26,20 @@ Bring up your own build environment ... just do a
    docker-compose up --build -d
    docker-compose logs
 ```
+
+### with sonar
+Warning: you need a lot of memory to use the full toolset (more than 10GB)
+```
+   git clone https://github.com/Springjunky/docker-local-build-environment.git
+   cd docker-local-build-environment
+   sudo ./setupEnvironment.sh
+   docker-compose  -f docker-compose.yml -f docker-compose-sonar.yml up --build
+   docker-compose logs
+```
+
+
+
+
 ### The first startup takes a long time (especially gitlab), so be patient
 
 open your favorite browser (_not_ at localhost, use the $(hostname)/jenkins )
