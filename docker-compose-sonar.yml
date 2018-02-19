@@ -1,0 +1,35 @@
+
+# docker-sonar configuration,
+# add this to your docker-compose up if you want to have sonarqube
+# docker-compose -f docker-xcompose.yml -f docker-compose-sonar.yml up
+version: "3"
+
+services:
+  postgres:
+    image: postgres
+    extra_hosts:
+      - ${DC_HOSTNAME}:${DC_HOSTIP}
+    networks:
+      - devstacknetwork
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+    volumes:
+      - ${DC_BASE_DATA_DIR}/postgres-db/postgresql:/var/lib/postgresql
+      # This needs explicit mapping due to
+      # https://github.com/docker-library/postgres/blob/4e48e3228a30763913ece952c611e5e9b95c8759/Dockerfile.template#L52
+      - ${DC_BASE_DATA_DIR}/postgres-db/postgresql_data:/var/lib/postgresql/data
+
+  sonar:
+    image: sonarqube
+    extra_hosts:
+      - ${DC_HOSTNAME}:${DC_HOSTIP}
+    networks:
+       - devstacknetwork
+    environment:
+      - SONARQUBE_JDBC_URL=jdbc:postgresql://postgres:5432/sonar
+    volumes:
+      - ${DC_BASE_DATA_DIR}/sonar/sonarqube_conf:/opt/sonarqube/conf
+      - ${DC_BASE_DATA_DIR}/sonar/sonarqube_data:/opt/sonarqube/data
+      - ${DC_BASE_DATA_DIR}/sonar/sonarqube_extensions:/opt/sonarqube/extensions
+      - ${DC_BASE_DATA_DIR}/sonar/sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins

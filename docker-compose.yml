@@ -20,11 +20,15 @@ services:
        # SSH Bypassing into gitlab, if you want to change this edit nginx.conf also
        - "2222:2222"   #ssh port of gitlab (ssh://git@myHOST:2222/scott/foo.git)
        - "5555:5555"   #Gitlab Docker Registry do NOT use 5000, this is an internal PORT of the gitlab-ce Image
+     depends_on: # start  proxy after all the others
+       - gitlab
+       - jenkins
+       - nexus
      networks:
        - devstacknetwork
 
 # ------------------------------------------------------------------------------
-  jenkins-fat:
+  jenkins:
     build: jenkins-fat
     extra_hosts:
       - ${DC_HOSTNAME}:${DC_HOSTIP}
