@@ -6,7 +6,7 @@ My personal solution is a local, docker-based CI/CD Build Environment ready in a
 * Jenkins (with open-jdk-8, ansible, docker and maven inside)
 * Gitlab (with a docker based gitlab-runner registrated)
 * Nexus 3
-* Sonar (in future releases..)
+* Sonar
 
 
 #### This is NOT for any cluster (Swarm / Kubernetes)
@@ -52,7 +52,7 @@ Now you are ready to go with a little CI/CD Environment:
  Jenkins  http://<your-host-name>/jenkins
  Nexus  http://<your-host-name>/nexus
  Gitlab  http://<your-host-name>/gitlab
- in the next Release:  Sonar  http://<your-host-name>/sonar
+ Sonar  http://<your-host-name>/sonar
 ```
 #### Security
 ... not really, its all http .. don't worry about it! It's only local communication
