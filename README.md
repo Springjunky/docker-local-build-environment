@@ -133,7 +133,7 @@ Use your browser and navigate to the "landing-page" at http://<your host>:8081 t
 _tl;dr_
 * login as user:admin, password:admin
 * create realm "springboot"
-* create client "product-app" as openid-connect client with Valid Redirect URI's  http://<your host>:8081/*
+* create client "product-app" as openid-connect client with Valid Redirect URI's  http://&lt;your host&gt;:8081/*
 * create role "user"
 * create user "testuser" and map the role "user" to testuser (tab Role Mappings)
  
