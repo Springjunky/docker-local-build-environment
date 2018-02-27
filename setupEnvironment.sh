@@ -124,8 +124,11 @@ else
   cp preconfig/sonar/sonar.properties $USER_DATA_DIR/sonar/sonarqube_conf
 fi
 
-#Copy predefined Jobs and Configs
+#Copy and modify predefined Jobs and Configs
 cp -r preconfig/jenkins/* $USER_DATA_DIR/jenkins/
+
+sed -i s#HOSTNAME#${HOSTNAME}#g  spring-boot-keycloak-sample/src/main/resources/application.properties 
+sed -i s#HOSTNAME#${HOSTNAME}#g  spring-boot-keycloak-sample/src/main/resources/static/index.html 
 
 # Set the right volume-names, hostname and host_ip in .env for docker-compose.yml
 echo "---------- generating .env file for docker-compose.yml "
@@ -133,6 +136,7 @@ cat .env.template > .env
 echo "DC_HOSTNAME=${HOSTNAME}" >> .env
 echo "DC_HOSTIP=${HOSTIP}" >> .env
 echo "DC_BASE_DATA_DIR=${USER_DATA_DIR}" >> .env
+chmod a+rw .env
 echo "---------- generated file  ---------------------------- "
 cat .env
 echo "-------------------------------------------------------------------------------------------"
@@ -145,9 +149,10 @@ echo " "
 echo "use the following URL"
 BASE_URL="http://"$(hostname)"/"
 echo "Jenkins: ${BASE_URL}jenkins"
-## echo "Sonar  : ${BASE_URL}sonar"
 echo "Nexus  : ${BASE_URL}nexus"
 echo "Gitlab : ${BASE_URL}gitlab"
+echo "Sonar: ${BASE_URL}sonar (optional)"
+echo "Keycloak: ${BASE_URL}auth (optional)"
 echo "Feel free to provide push-requests :-)"
 pause 
 echo " "
