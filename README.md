@@ -34,6 +34,7 @@ so you can be your own local "DevOp"; nearly every category of [periodic table o
 |5432 |postgres standard |
 |2222 |ssh port of gitlab, used to push via ssh connection |
 |5555 |Gitlab Docker-registry |
+
 If your change the ports in the docker-compose.yml change them also in nginx-reverse/nginx.conf (stream {...} )
 ## Installation
 ### without sonar
