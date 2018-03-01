@@ -14,13 +14,14 @@ networks:
 services:
 # ------------------------------------------------------------------------------
   ngnix:
+     container_name: nginx-reverse
      build: nginx-reverse
      ports:
-       - "80:80"             #http://
-       - "5432:5432"       # Default-Port of the Postges DB passing jdbc-Connections to the postgres-Container 
-       - "2222:2222"     #ssh port of gitlab (ssh://git@myHOST:2222/scott/foo.git)
-       - "5555:5555"  #Gitlab Docker Registry do NOT use 5000, this is an internal PORT of the gitlab-ce Image
-     command: ["nginx-debug", "-g", "daemon off;"]  # Start nginx in debug to see whats going on    
+       - 80:80      # http://
+       - 5432:5432  # Default-Port of the Postges DB passing jdbc-Connections to the postgres-Container 
+       - 2222:2222  # ssh port of gitlab (ssh://git@myHOST:2222/scott/foo.git)
+       - 5555:5555  # Gitlab Docker Registry do NOT use 5000, this is an internal PORT of the gitlab-ce Image
+     #command: ["nginx-debug", "-g", "daemon off;"]  # Start nginx in debug to see whats going on    
      depends_on: # start  proxy after all the others
        - gitlab
        - jenkins
@@ -28,7 +29,31 @@ services:
      networks:
        - devstacknetwork
 # ------------------------------------------------------------------------------
+  regweb:
+    container_name: docker-registry-web
+    image: hyper/docker-registry-web
+    networks:
+      - devstacknetwork
+    extra_hosts:
+      - ${DC_HOSTNAME}:${DC_HOSTIP}
+    environment:
+      - REGISTRY_URL=http://${DC_HOSTNAME}:5000/v2  
+      - REGISTRY_NAME=Your docker-local-build-registry@${DC_HOSTNAME}:5000
+      - REGISTRY_READONLY=false 
+      - REGISTRY_CONTEXT_PATH=/regweb
+# ------------------------------------------------------------------------------
+  registry:
+    container_name: registry
+    image: registry:2
+    network_mode: "host"
+    ports:
+      - 5000:5000
+    volumes:
+      - ${DC_BASE_DATA_DIR}/docker-registry/config.yml:/etc/docker/registry/config.yml
+      - ${DC_BASE_DATA_DIR}/docker-registry/images:/var/lib/registry
+# ------------------------------------------------------------------------------
   postgres:
+    container_name: postgres
     build: postgres
     extra_hosts:
       - ${DC_HOSTNAME}:${DC_HOSTIP}
@@ -48,6 +73,7 @@ services:
 
   jenkins:
     build: jenkins-fat
+    container_name: jenkins-fat
     extra_hosts:
       - ${DC_HOSTNAME}:${DC_HOSTIP}
     networks:
@@ -59,6 +85,7 @@ services:
 # ------------------------------------------------------------------------------
   gitlab:
     image: 'gitlab/gitlab-ce:latest'
+    container_name: gitlab-ce
     extra_hosts:
       - ${DC_HOSTNAME}:${DC_HOSTIP}
     networks:
@@ -87,6 +114,7 @@ services:
 # ------------------------------------------------------------------------------
   nexus:
     image: sonatype/nexus3
+    container_name: sonatype-nexus3
     extra_hosts:
       - ${DC_HOSTNAME}:${DC_HOSTIP}
     networks:
@@ -99,6 +127,7 @@ services:
 # ------------------------------------------------------------------------------
   gitlabrunner:
     build: gitlabrunner
+    container_name: gitlabrunner
     network_mode: "host"
     extra_hosts:
       - ${DC_HOSTNAME}:${DC_HOSTIP}

@@ -7,6 +7,7 @@ version: "3"
 services:
   sonar:
     image: sonarqube
+    container_name: sonarcube
     depends_on: # start  proxy after all the others
       - postgres
     extra_hosts:

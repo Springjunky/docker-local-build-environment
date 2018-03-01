@@ -10,12 +10,15 @@ My personal solution is a local, docker-based CI/CD Build Environment ready in a
   * docker
 * Gitlab 
   * and a docker based gitlab-runner registrated
-  * suecured docker-registry ready (openssh certificate)
+  * secured docker-registry ready (openssh certificate)
   * push with ssh avialable at port 2222
 * Nexus 3
 * Sonar
-* Keykloak (as Single Sign or JWT playground)
-* Postgres (used by sonar, keycloak and YOUR applications)
+* Keykloak (as Single Sign On or JWT playground)
+* Postgres (used by Sonar, Keycloak and YOUR applications)
+* Standard Docker-Registry V2 with a simple UI 
+
+
 
 so you can be your own local "DevOp"; nearly every category of [periodic table of devoptools][4] has one tool in your local setup. 
 
@@ -30,10 +33,11 @@ so you can be your own local "DevOp"; nearly every category of [periodic table o
 
 |Port  |  Why  |
 |---|---|
-|80 |NGINX   |
-|5432 |postgres standard |
-|2222 |ssh port of gitlab, used to push via ssh connection |
-|5555 |Gitlab Docker-registry |
+|80 |NGINX, forwards requests ton internal docker-containers   |
+|5432 |postgres standard connection port |
+|2222 |ssh port of gitlab, used to push via ssh connection ssh://git@myHOST:2222/scott/foo.git |
+|5555 |Gitlab docker-registry secured with GitLab credentials |
+|5000 |Standard Docker-Registry v2 not secured|
 
 If your change the ports in the docker-compose.yml change them also in nginx-reverse/nginx.conf (stream {...} )
 ## Installation
@@ -78,6 +82,7 @@ Now you are ready to go with a little CI/CD Environment:
  Gitlab  http://<your-host-name>/gitlab
  Sonar  http://<your-host-name>/sonar
  Keycloak http://<your-host-name>/auth
+ Docker-Registry-Ui: http://<your-host-name>/regweb 
  Postgres: At standard listenport 5432 for your jdbc-connection-string 
            stream-passthrough to postgres-container.
 ```
@@ -99,6 +104,9 @@ See Readme in folder security-paranoia if you want to have some hints how to con
 |Postgres|postgres|admin|
 
 ## The Tools
+There are some configurations you have to do after setup.
+*Remember:* At every time use your real hostname and NOT localhost (locahost inside a container is the container itself).
+For example: If yuo configure a GitLab-Connection in Jenkins, you will reach Gitlab at http://&lt;you host&gt;/gitlab and not http://localhost/gitlab
 ### Jenkins
 * MAVEN_HOME is /opt/maven
 * JAVA_HOME is /usr/lib/jvm/java-8-openjdk-amd64
@@ -109,10 +117,10 @@ See Readme in folder security-paranoia if you want to have some hints how to con
 * the docker-registry from GitLab is at port 5555 (and secured with an openssl certificate ..thats part of
   setupEnvironment.sh), just create a project in gitlab and click at the registry tab to show
   how to login to the project registry and how to tag your images and upload them.
-* ssh cloning and pushing is at port 2222
+* ssh cloning and pushing is at port 2222 (ssh://git@myHOST:2222/scott/foo.git remeber to upload your public key before, should be ~/.ssh/id_rsa.pub )
 
 #### gitlab-runner
-The runner is a gitlab-multirunner image with a docker-runner (concurrent=1) , based on [gitlab/gitlab-runner][2]  at every startup any runner is removed and only ONE new runner ist registrated to avoid multiple runners  (the pipeline-history maybe lost.) docker-in-docker works :-)
+The runner is a gitlab-multirunner image with a docker-runner (concurrent=1) , based on [gitlab/gitlab-runner][2]  at every startup any runner is removed and only ONE new runner is registrated to avoid multiple runners  (the pipeline-history maybe lost.) docker-in-docker works :-)
 
 It takes a long time until gitlab is ready to accept a runner registration, if it fails, increase the REGISTER_TRYS in docker-compse.yml
 
@@ -136,16 +144,17 @@ _tl;dr_
 * create client "product-app" as openid-connect client with Valid Redirect URI's  http://&lt;your host&gt;:8081/*
 * create role "user"
 * create user "testuser" and map the role "user" to testuser (tab Role Mappings)
- 
-### Nexus
-Some ToDo for me described here
-[Unsecure docker-registry in Nexus][1]
-use GitLab as a secured registry
-..
-And _yes_ docker-plugin in jenkins works (docker in docker, usefull but not recommended)
+
+
 ### Postgres
-You can use any tool to connect to the database at locahost:5432 this is a pass through to the container so any
+You can use any tool to connect to the database at localhost:5432 this is a pass through to the container so any
 JDBC-Connection should work
+
+### The Docker-Registries
+* NEXUS-Docker-Registry ist NOT configured .. needs a pass trough and some more configs, see [Unsecure docker-registry in Nexus][1] feel free to provide a push-request
+* GitLab docker-registry is at port 5555 you have to use your GitLab Credentials from the corresponding git-respository
+* standard Docker-Registry v2 ist at standard port 5000 with no credentials, so eays-to-use
+
 
 ## Troubleshooting
 ##### check Hostname and IP
@@ -153,17 +162,17 @@ In most cases a wrong HOSTNAME:HOSTIP causes trouble, to check this try the foll
 * log into the jenkins-fat container (with id)
 ```
   docker container ls
-  docker container exec -it dockerlocalbuildenvironment_jenkins_1 bash
+  docker container exec -it jenkins-fat bash
+  chmod a+rw /tmp
   apt-get update
   apt-get install -y --allow-unauthenticated iputils-ping
-  ping google.de
   ping jenkins
   ping gitlab
   ping <your local hostname>
 ```
 every ping must work, if not, check the .env file, is there the correct DC_HOSTNAME / DC_HOSTIP ?
 
-##### changed networks ?
+##### changed interface ip ?
   If you change your network (switching between home/office/lan/wifi) your ip-address
   could be change and the container is not able to resolve your host any more
   Check the .env file or just run the setup-Script again. 
@@ -185,7 +194,7 @@ every ping must work, if not, check the .env file, is there the correct DC_HOSTN
 * ~~apply git-lfs~~
 * ~~apply sonar~~
 * ~~apply keycloak~~
-* apply a better registry
+* ~~apply a better registry~~
 
 
 

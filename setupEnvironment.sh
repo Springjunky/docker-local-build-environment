@@ -77,6 +77,7 @@ mkdir -p $USER_DATA_DIR/sonar/sonarqube_conf
 mkdir -p $USER_DATA_DIR/jenkins
 mkdir -p $USER_DATA_DIR/gitlab/config/ssl
 mkdir -p $USER_DATA_DIR/nexus
+mkdir -p $USER_DATA_DIR/docker-registry/images
 chown -R 200 $USER_DATA_DIR/nexus
 #----------------------------------
 
@@ -127,6 +128,10 @@ fi
 #Copy and modify predefined Jobs and Configs
 cp -r preconfig/jenkins/* $USER_DATA_DIR/jenkins/
 
+# Copy Registry Config
+cp preconfig/docker-registry/config.yml $USER_DATA_DIR/docker-registry
+
+# Prepare the sample-project to run on <your-host>
 sed -i s#HOSTNAME#${HOSTNAME}#g  spring-boot-keycloak-sample/src/main/resources/application.properties 
 sed -i s#HOSTNAME#${HOSTNAME}#g  spring-boot-keycloak-sample/src/main/resources/static/index.html 
 
@@ -148,11 +153,12 @@ echo "Environment for docker-compose.yml created"
 echo " "
 echo "use the following URL"
 BASE_URL="http://"$(hostname)"/"
-echo "Jenkins: ${BASE_URL}jenkins"
-echo "Nexus  : ${BASE_URL}nexus"
-echo "Gitlab : ${BASE_URL}gitlab"
-echo "Sonar: ${BASE_URL}sonar (optional)"
-echo "Keycloak: ${BASE_URL}auth (optional)"
+echo "Jenkins:            ${BASE_URL}jenkins"
+echo "Nexus  :            ${BASE_URL}nexus"
+echo "Gitlab :            ${BASE_URL}gitlab"
+echo "Docker-Registry-Ui: ${BASE_URL}regweb"
+echo "Sonar:              ${BASE_URL}sonar (optional)"
+echo "Keycloak:           ${BASE_URL}auth (optional)"
 echo "Feel free to provide push-requests :-)"
 pause 
 echo " "
@@ -160,7 +166,7 @@ echo " "
 echo "Setup finished, just type the following commands to start and see the logs of your environment"
 echo "docker-compose up --build -d "
 echo "docker-compose logs -f"
-
+echo "be patient ...10 docker-containers needs time to start up " 
 
 
 

@@ -6,6 +6,7 @@ version: "3"
 services:
   keycloak:
     image: jboss/keycloak
+    container_name: jboss-keycloak
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin

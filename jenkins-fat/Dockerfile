@@ -6,7 +6,6 @@ ENV JAVA_VERSION=8 \
     JAVA_HOME="/usr/lib/jvm/default-jvm"
 
 # update dpkg repositories and install tools
-
 RUN apt-get update
 #------------ Open JDK
 RUN apt-get install -y openjdk-8-jdk
