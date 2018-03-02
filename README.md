@@ -33,7 +33,7 @@ so you can be your own local "DevOp"; nearly every category of [periodic table o
 
 |Port  |  Why  |
 |---|---|
-|80 |NGINX, forwards requests ton internal docker-containers   |
+|80 |NGINX, forwards requests to internal docker-containers   |
 |5432 |postgres standard connection port |
 |2222 |ssh port of gitlab, used to push via ssh connection ssh://git@myHOST:2222/scott/foo.git |
 |5555 |Gitlab docker-registry secured with GitLab credentials |
