@@ -164,8 +164,11 @@ pause
 echo " "
 
 echo "Setup finished, just type the following commands to start and see the logs of your environment"
-echo "docker-compose up --build -d "
+echo " "
+echo "Without Sonar and Keycloak: docker-compose up --build -d "
+echo "Full Toolset              : docker-compose -f docker-compose.yml -f docker-compose-sonar.yml -f docker-compose-keycloak.yml up --build -d"
 echo "docker-compose logs -f"
+echo " " 
 echo "be patient ...10 docker-containers needs time to start up " 
 
 
