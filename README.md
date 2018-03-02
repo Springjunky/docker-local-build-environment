@@ -184,6 +184,33 @@ every ping must work, if not, check the .env file, is there the correct DC_HOSTN
   You can do an "pre download of the plugins", see the readme.md at jenkins-fat direcory
 
 
+## Starting from scratch
+To delete everything an start from scratch (own risk, you will lost all your setting projects and data)
+```diff
+- WARNING: this will delete EVERY docker-Images and container and ALL your docker-data !!!
+```
+
+```
+# switch to your home directory
+cd 
+# delete ALL YOUR Settings and data !!!!!
+sudo rm -rf devstack-data/
+
+# delete all downloaded images
+docker rmi -f $(docker images -aq)
+
+# delete all startet container
+docker container stop $(docker container ls -aq)
+docker container rm $(docker container ls -aq)
+
+# delete docker-container volumes
+docker volume prune 
+
+# delete docker-networks
+docker network rm dockerlocalbuildenvironment_default dockerlocalbuildenvironment_devstacknetwork
+
+```
+
 ### My next steps
 
 * give you some more preconfiguration
