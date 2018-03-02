@@ -138,6 +138,7 @@ There is a testproject in folder spring-boot-keycloak-sample, it is a standard S
 mv spring-boot:run
 ``` 
 Use your browser and navigate to the "landing-page" at http://<your host>:8081 the "My products" link will redirect you to Keycloak (must be setup with settings from [this tutorial][3], but use your *REAL* hostname, not _localhost_ as Valid Redirect URI's )
+ 
 _tl;dr_
 * login as user:admin, password:admin
 * create realm "springboot"
