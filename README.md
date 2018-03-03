@@ -22,6 +22,8 @@ My personal solution is a local, docker-based CI/CD Build Environment ready in a
 
 so you can be your own local "DevOp"; nearly every category of [periodic table of devoptools][4] has one tool in your local setup. 
 
+#### just a docker-compose up give you this !
+
 ![Screenshot](docker-local-build.jpg)
 
 ## This is NOT for any cluster (Swarm/Kubernetes)
