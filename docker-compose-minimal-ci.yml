@@ -1,0 +1,123 @@
+#####################################
+# Don't touch this file is generated
+# expecilly for: ${DC_HOSTNAME}
+###################################
+#
+# Consider to Backup  ${DC_BASE_DATA_DIR}
+#
+version: "3"
+
+networks:
+  devstacknetwork:
+    driver: bridge
+
+services:
+# ------------------------------------------------------------------------------
+  ngnix:
+     container_name: nginx-reverse
+     build: nginx-reverse
+     ports:
+       - 80:80      # http://
+       - 5432:5432  # Default-Port of the Postges DB passing jdbc-Connections to the postgres-Container 
+       - 2222:2222  # ssh port of gitlab (ssh://git@myHOST:2222/scott/foo.git)
+       - 5555:5555  # Gitlab Docker Registry do NOT use 5000, this is an internal PORT of the gitlab-ce Image
+     #command: ["nginx-debug", "-g", "daemon off;"]  # Start nginx in debug to see whats going on    
+     depends_on: # start  proxy after all the others
+       - gitlab
+       - jenkins
+       - nexus
+     volumes:
+        # Overwrites the Dockerfile Copys (ugly but works)
+       - ./nginx-reverse/reverse-proxy-min.conf:/etc/nginx/conf.d/reverse-proxy.conf
+     networks:
+       - devstacknetwork
+   
+    
+# ------------------------------------------------------------------------------
+  jenkins:
+    build: jenkins-fat
+    container_name: jenkins-fat
+    extra_hosts:
+      - ${DC_HOSTNAME}:${DC_HOSTIP}
+    networks:
+      - devstacknetwork
+    volumes:
+      - ${DC_BASE_DATA_DIR}/jenkins:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+# ------------------------------------------------------------------------------
+  gitlab:
+    image: 'gitlab/gitlab-ce:latest'
+    container_name: gitlab-ce
+    extra_hosts:
+      - ${DC_HOSTNAME}:${DC_HOSTIP}
+    networks:
+      - devstacknetwork
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://${DC_HOSTNAME}/gitlab'
+        gitlab_rails['initial_root_password'] = "gitlab4me"
+        gitlab_rails['initial_shared_runners_registration_token'] = "s3cretToken4Runner"
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+        # docker-registry config
+        registry_external_url 'https://${DC_HOSTNAME}:5555'
+        registry_nginx['listen_port'] = 5555
+        registry_nginx['listen_https'] = true
+        # SSL config just for the docker-registry need
+        nginx['ssl_certificate'] = "/etc/gitlab/ssl/${DC_HOSTNAME}.crt"
+        nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/${DC_HOSTNAME}.key"
+        registry_nginx['proxy_set_headers'] = {
+        "X-Forwarded-Proto" => "https",
+        "X-Forwarded-Ssl" => "on"
+        }
+    volumes:
+      - ${DC_BASE_DATA_DIR}/gitlab/config:/etc/gitlab
+      - ${DC_BASE_DATA_DIR}/gitlab/logs:/var/log/gitlab
+      - ${DC_BASE_DATA_DIR}/gitlab/data:/var/opt/gitlab
+# ------------------------------------------------------------------------------
+  nexus:
+    image: sonatype/nexus3
+    container_name: sonatype-nexus3
+    extra_hosts:
+      - ${DC_HOSTNAME}:${DC_HOSTIP}
+    networks:
+      - devstacknetwork
+    environment:
+      - NEXUS_CONTEXT=nexus
+    volumes:
+      - ${DC_BASE_DATA_DIR}/nexus:/nexus-data
+# ------------------------------------------------------------------------------
+  gitlabrunner:
+    build: gitlabrunner
+    container_name: gitlabrunner
+    network_mode: "host"
+    extra_hosts:
+      - ${DC_HOSTNAME}:${DC_HOSTIP}
+    environment:
+      - GITLAB_URL=http://${DC_HOSTNAME}/gitlab
+      - HOSTNAME=${DC_HOSTNAME}
+      - HOSTIP=${DC_HOSTIP}
+      - REGISTER_TOKEN=s3cretToken4Runner
+      - REGISTER_TRYS=60 # every 10 seconds a try to register the runner..gitlab takes a long time to startup
+    volumes:
+      - ${DC_BASE_DATA_DIR}/gitlab-runner/config:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+     
+# ------------------------------------------------------------------------------
+  postgres:
+    container_name: postgres
+    build: postgres
+    extra_hosts:
+      - ${DC_HOSTNAME}:${DC_HOSTIP}
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=postgres
+    networks:
+      - devstacknetwork
+    volumes:
+      - ${DC_BASE_DATA_DIR}/postgres-db/postgresql:/var/lib/postgresql
+      # This needs explicit mapping due to
+      # https://github.com/docker-library/postgres/blob/4e48e3228a30763913ece952c611e5e9b95c8759/Dockerfile.template#L52
+      # there is ENV PGDATA /var/lib/postgresql/data
+      - ${DC_BASE_DATA_DIR}/postgres-db/postgresql_data:/var/lib/postgresql/data
+    
+      

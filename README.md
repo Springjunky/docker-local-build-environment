@@ -45,8 +45,20 @@ so you can be your own local "DevOp"; nearly every category of [periodic table o
 
 If your change the ports in the docker-compose.yml change them also in nginx-reverse/nginx.conf (stream {...} )
 ## Installation
-### without sonar
+
 Bring up your own DevOp Playground  ... just do a
+
+### minimal setup (GitLab,GitLab-runner,Jenkins,Nexus,Postgres) takes 6GiB
+```
+ git clone https://github.com/Springjunky/docker-local-build-environment.git
+ cd docker-local-build-environment
+ sudo ./setupEnvironment.sh
+ docker-compose up -f docker-compose-minimal-ci.yml up --build 
+ docker-compose logs
+```
+starts 6 container
+
+### medium setup without sonar (same like above and with Docker-Registry and simple Docker-Registry-UI) takes 8GiB
 ```
    git clone https://github.com/Springjunky/docker-local-build-environment.git
    cd docker-local-build-environment
@@ -54,9 +66,9 @@ Bring up your own DevOp Playground  ... just do a
    docker-compose up --build -d
    docker-compose logs
 ```
+starts 8 container
 
-### with sonar and/or Keycloak
-Warning: you need a lot of memory to use the full toolset (more than 10GB)
+### maximum setup (same like above and with Sonar and Keycloak) takes more than 10GiB
 ```
    git clone https://github.com/Springjunky/docker-local-build-environment.git
    cd docker-local-build-environment
@@ -73,6 +85,8 @@ Warning: you need a lot of memory to use the full toolset (more than 10GB)
    
    docker-compose logs
 ```
+start 10 container
+
 ### The first startup takes a long time (especially gitlab), so be patient
 open your favorite browser (_not_ at localhost, use the $(hostname)/jenkins )
 to prevent jenkins spit out "your reverse proxy is wrong")
