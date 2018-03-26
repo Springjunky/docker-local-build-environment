@@ -48,6 +48,16 @@ If your change the ports in the docker-compose.yml change them also in nginx-rev
 
 Bring up your own DevOp Playground  ... just do a
 
+### micro setup (GitLab,GitLab-runner) takes 4GiB
+```
+ git clone https://github.com/Springjunky/docker-local-build-environment.git
+ cd docker-local-build-environment
+ sudo ./setupEnvironment.sh
+ docker-compose up -f docker-compose-micro-ci.yml up --build 
+ docker-compose logs
+```
+starts 3 container
+
 ### minimal setup (GitLab,GitLab-runner,Jenkins,Nexus,Postgres) takes 6GiB
 ```
  git clone https://github.com/Springjunky/docker-local-build-environment.git
@@ -85,7 +95,7 @@ starts 8 container
    
    docker-compose logs
 ```
-start 10 container
+starts 10 container
 
 ### The first startup takes a long time (especially gitlab), so be patient
 open your favorite browser (_not_ at localhost, use the $(hostname)/jenkins )
