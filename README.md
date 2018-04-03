@@ -230,7 +230,7 @@ docker rmi -f $(docker images -aq)
 
 # delete all startet container
 docker container stop $(docker container ls -aq)
-docker container rm $(docker container ls -aq)
+docker container prune
 
 # delete docker-container volumes
 docker volume prune 
