@@ -1,4 +1,4 @@
-FROM ubuntu:17.10
+FROM ubuntu:18.04
 ENV DEBIAN_FRONTEND noninteractive
 ENV JAVA_VERSION=8 \
     JAVA_UPDATE=131 \
@@ -7,12 +7,14 @@ ENV JAVA_VERSION=8 \
 
 # update dpkg repositories and install tools
 RUN apt-get update
+#--------------------------------------------
 #------------ Open JDK
 RUN apt-get install -y openjdk-8-jdk
-#------------ Tools f Jenkins and apt-get to use SSL Repositorys
+#--------------------------------------------
+#------------ Tools for Jenkins and apt-get to use SSL Repositorys
 RUN apt-get install -y --no-install-recommends apt-utils git wget curl graphviz \
-    apt-transport-https ca-certificates software-properties-common
- #-----------------------------------------------
+    apt-transport-https ca-certificates software-properties-common gpg-agent zip unzip
+#-----------------------------------------------
 #---------------  Ansible
 #-----------------------------------------------
 RUN  apt-add-repository ppa:ansible/ansible 2>/dev/null
@@ -20,19 +22,27 @@ RUN  apt-get update  &&  apt-get -y install ansible
 #--------------------------------------------
 #------------ Docker
 #--------------------------------------------
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg > docker-public-key && apt-key add docker-public-key && rm docker-public-key
-RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-RUN apt-get update && apt-get install -y docker-ce
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg > docker-public-key && \
+    apt-key add docker-public-key && \
+    rm docker-public-key 
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) edge" && \
+     apt-get update && apt-get install -y docker-ce
 #--------------------------------------------
 #------------ Docker Compose
 #--------------------------------------------
-RUN curl -o /usr/bin/docker-compose -L "https://github.com/docker/compose/releases/download/1.18.0/docker-compose-$(uname -s)-$(uname -m)" \
+RUN curl -o /usr/bin/docker-compose -L \
+    "https://github.com/docker/compose/releases/download/1.21.2/docker-compose-$(uname -s)-$(uname -m)" \
     && chmod +x /usr/bin/docker-compose
+
+#--------------------------------------------
+#------------ Jenkins with jdk-8
+#--------------------------------------------
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
 # This is the line for the Jenkins prefix to set ... remember
-# to set the location in the  reverse-proxy.conf
+# to set the location in the  reverse-proxy.conf if you change this
+
 ENV JENKINS_OPTS="--webroot=/var/cache/jenkins/war --prefix=/jenkins"
 ENV GIT_SSL_NO_VERIFY=1
 #-----------------------------------------------
@@ -51,16 +61,20 @@ ENV GIT_SSL_NO_VERIFY=1
 #----------------------------------------
 #  install Maven
 #----------------------------------------
-# get maven 3.5.2
-RUN wget --no-verbose -O /tmp/apache-maven-3.5.2.tar.gz http://archive.apache.org/dist/maven/maven-3/3.5.2/binaries/apache-maven-3.5.2-bin.tar.gz
-# verify checksum
-RUN echo "948110de4aab290033c23bf4894f7d9a /tmp/apache-maven-3.5.2.tar.gz" | md5sum -c
-# install maven
-RUN tar xzf /tmp/apache-maven-3.5.2.tar.gz -C /opt/ && ln -s /opt/apache-maven-3.5.2 /opt/maven
+RUN wget --no-verbose -O /tmp/apache-maven-3.5.3.tar.gz \
+          http://archive.apache.org/dist/maven/maven-3/3.5.3/binaries/apache-maven-3.5.3-bin.tar.gz
+# verify checksum and install maven
+RUN echo "51025855d5a7456fc1a67666fbef29de /tmp/apache-maven-3.5.3.tar.gz" | md5sum -c && \
+    tar xzf /tmp/apache-maven-3.5.3.tar.gz -C /opt/ && ln -s /opt/apache-maven-3.5.3 /opt/maven
+    
 ENV MAVEN_HOME /opt/maven
 ENV PATH $MAVEN_HOME/bin:$JAVA_HOME/bin:$PATH
 
-RUN apt-get update && apt-get install -y  zip unzip && rm -rf /opt/java/src.zip && rm -rf /tmp/$filename && rm -f /tmp/apache-maven-3.5.2.tar.gz
+RUN rm -rf /opt/java/src.zip && \
+    rm -rf /tmp/$filename && \
+    rm -f  /tmp/apache-maven-3.5.3.tar.gz
+
+
 #------------------------------
 # install Jenkins
 #------------------------------
@@ -81,8 +95,8 @@ VOLUME /var/jenkins_home
 # to set on a fresh new installation. Use it to bundle additional plugins
 # or config file with your custom jenkins Docker image.
 RUN mkdir -p /usr/share/jenkins/ref/init.groovy.d && mkdir /tmp
-ENV TINI_VERSION 0.14.0
-ENV TINI_SHA 6c41ec7d33e857d4779f14d9c74924cab0c7973485d2972419a3b7c7620ff5fd
+ENV TINI_VERSION 0.18.0
+ENV TINI_SHA eadb9d6e2dc960655481d78a92d2c8bc021861045987ccd3e27c7eae5af0cf33
 # Use tini as subreaper in Docker container to adopt zombie processes
 RUN curl -fsSL https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini-static-amd64 -o /bin/tini && chmod +x /bin/tini \
   && echo "$TINI_SHA  /bin/tini" | sha256sum -c -
@@ -92,20 +106,22 @@ COPY init.groovy /usr/share/jenkins/ref/init.groovy.d/tcp-slave-agent-port.groov
 # jenkins version being bundled in this docker image
 # This is the latest stable version
 ARG JENKINS_VERSION
-ENV JENKINS_VERSION ${JENKINS_VERSION:-2.89.3}
+ENV JENKINS_VERSION ${JENKINS_VERSION:-2.125}
 
 #### jenkins.war checksum, download will be validated using it
 ARG JENKINS_SHA=80d9a44198195f70218867086759c108821ca0ce
-
-ARG JENKINS_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war
+ARG JENKINS_URL=http://updates.jenkins-ci.org/download/war/${JENKINS_VERSION}/jenkins.war
 
 # could use ADD but this one does not check Last-Modified header neither does it allow to control checksum
 # see https://github.com/docker/docker/issues/8331
-RUN curl -fsSL ${JENKINS_URL} -o /usr/share/jenkins/jenkins.war && echo "${JENKINS_SHA}  /usr/share/jenkins/jenkins.war" | sha1sum -c -
+# RUN curl -fsSL ${JENKINS_URL} -o /usr/share/jenkins/jenkins.war && echo "${JENKINS_SHA}  /usr/share/jenkins/jenkins.war" | sha1sum -c -
+
+RUN wget --no-verbose ${JENKINS_URL} -O /usr/share/jenkins/jenkins.war  && \
+    echo "422ba2120ade4c39e19c1aa63684c5db /usr/share/jenkins/jenkins.war" | md5sum -c
 
 #------------------ Optional local caching of files
 # Download jenkins with yout favorite browser and put the war in the current dir.
-# COPY jenkins-war-2.89.2.war /usr/share/jenkins/jenkins.war
+# COPY jenkins-war-${JENKINS_VERSION:-2.99}.war /usr/share/jenkins/jenkins.war
 ###### # Copy all Cached plugins ...
 # to preLoad all Plugins listed in active-plugins.txt use the command
 #  ./preDownload.sh $(cat active-plugins.txt)
@@ -131,7 +147,8 @@ ENV JAVA_OPTIONS="-Djava.awt.headless=true -Dhudson.security.csrf.requestfield=c
 
 ENTRYPOINT ["/bin/tini", "--", "/usr/local/bin/jenkins.sh"]
 #-------------------------------------------------------------------------
-# get all Plugins from existing Jenins without Version (latest is used)
+# if you need a list of all your actual plugins use this to 
+# get all Plugins from an existing Jenins without Version (latest is used)
 #--------------------------------------------------------------------------
 # JENKINS_HOST=username:password@myhost.com:port
 # curl -sSL "http://$JENKINS_HOST/pluginManager/api/xml?depth=1&xpath=/*/*/shortName|/*/*/version&wrapper=plugins" | \
@@ -150,4 +167,4 @@ RUN /usr/local/bin/plugins.sh active-plugins.txt
 
 USER root
 
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get clean autoremove && rm -rf /var/lib/apt/lists/*

@@ -148,7 +148,10 @@ For example: If yuo configure a GitLab-Connection in Jenkins, you will reach Git
 * ssh cloning and pushing is at port 2222 (ssh://git@myHOST:2222/scott/foo.git remeber to upload your public key before, should be ~/.ssh/id_rsa.pub )
 
 #### gitlab-runner
-The runner is a gitlab-multirunner image with a docker-runner (concurrent=1) , based on [gitlab/gitlab-runner][2]  at every startup any runner is removed and only ONE new runner is registrated to avoid multiple runners  (the pipeline-history maybe lost.) docker-in-docker works :-)
+The runner is a gitlab-multirunner image with a docker-runner (concurrent=1) , based on [gitlab/gitlab-runner][2]  at every startup any runner is removed and only ONE new runner 
+is registrated to avoid multiple runners  (the pipeline-history maybe lost.) 
+setups with a shell-runner works, docker-in-docker (docker:dind) or docker based builds should cause trouble because the 
+default DNS-Server of a docker-container ist 8.8.8.8 (google) see this link [extra_host for servce][5] for a possible workaround 
 
 It takes a long time until gitlab is ready to accept a runner registration, if it fails, increase the REGISTER_TRYS in docker-compse.yml
 
@@ -165,7 +168,7 @@ There is a testproject in folder spring-boot-keycloak-sample, it is a standard S
 ```
 mv spring-boot:run
 ``` 
-Use your browser and navigate to the "landing-page" at http://<your host>:8081 the "My products" link will redirect you to Keycloak (must be setup with settings from [this tutorial][3], but use your *REAL* hostname, not _localhost_ as Valid Redirect URI's )
+Use your browser and navigate to the "landing-page" at http://your-host:8081 the "My products" link will redirect you to Keycloak (must be setup with settings from [this tutorial][3], but use your *REAL* hostname, not _localhost_ as Valid Redirect URI's )
  
 _tl;dr_
 * login as user:admin, password:admin
@@ -258,3 +261,4 @@ docker network rm dockerlocalbuildenvironment_default dockerlocalbuildenvironmen
 [2]: https://hub.docker.com/r/gitlab/gitlab-runner/
 [3]: https://developers.redhat.com/blog/2017/05/25/easily-secure-your-spring-boot-applications-with-keycloak/
 [4]: https://xebialabs.com/periodic-table-of-devops-tools/
+[5]: https://gitlab.com/gitlab-org/gitlab-runner/issues/2302
