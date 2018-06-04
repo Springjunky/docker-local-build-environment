@@ -129,6 +129,7 @@ services:
     build: gitlabrunner
     container_name: gitlabrunner
     network_mode: "host"
+    privileged: true
     extra_hosts:
       - ${DC_HOSTNAME}:${DC_HOSTIP}
     environment:
