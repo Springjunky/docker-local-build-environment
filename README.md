@@ -53,7 +53,7 @@ Bring up your own DevOp Playground  ... just do a
  git clone https://github.com/Springjunky/docker-local-build-environment.git
  cd docker-local-build-environment
  sudo ./setupEnvironment.sh
- docker-compose up -f docker-compose-micro-ci.yml up --build 
+ docker-compose -f docker-compose-micro-ci.yml up --build -d
  docker-compose logs
 ```
 starts 3 container
@@ -63,7 +63,7 @@ starts 3 container
  git clone https://github.com/Springjunky/docker-local-build-environment.git
  cd docker-local-build-environment
  sudo ./setupEnvironment.sh
- docker-compose up -f docker-compose-minimal-ci.yml up --build 
+ docker-compose -f docker-compose-minimal-ci.yml up --build -d
  docker-compose logs
 ```
 starts 6 container
@@ -73,7 +73,7 @@ starts 6 container
    git clone https://github.com/Springjunky/docker-local-build-environment.git
    cd docker-local-build-environment
    sudo ./setupEnvironment.sh
-   docker-compose up --build -d
+   docker-compose --build -d
    docker-compose logs
 ```
 starts 8 container
