@@ -1,9 +1,22 @@
-master:
-  build: .
-  environment:
-    JAVA_OPTS: "-Djava.awt.headless=true"
-  ports:
-    - "50000:50000"
-    - "8080:8080"
-  volumes:
-    - /var/jenkins_home
+version: "3"
+
+networks:
+  devstacknetwork:
+    driver: bridge
+
+services:
+  jenkins:
+    ports:
+       - 8080:8080      # http://
+    build: 
+      context: .
+      args:
+        JENKINS_LTS_VERSION: 2.176
+    container_name: jenkins-fat
+    networks:
+      - devstacknetwork
+    volumes:
+      - /home/tom/devstack-data/jenkins:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+
+      

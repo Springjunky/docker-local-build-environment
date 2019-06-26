@@ -1,5 +1,5 @@
-analysis-collector
 ace-editor
+analysis-collector
 analysis-core
 ansible
 ansicolor
@@ -21,12 +21,14 @@ cloudbees-folder
 compact-columns
 conditional-buildstep
 config-file-provider
+configuration-as-code
 console-badge
 console-column-plugin
 console-tail
 copyartifact
 credentials
 credentials-binding
+cucumber-reports
 cvs
 delivery-pipeline-plugin
 dependencyanalyzer
@@ -79,6 +81,7 @@ junit
 lastfailureversioncolumn
 lastsuccessversioncolumn
 ldap
+lockable-resources
 m2release
 mailer
 mapdb-api
@@ -130,8 +133,6 @@ timestamper
 token-macro
 variant
 violation-comments-to-github
-virtualbox
-windows-slaves
 workflow-aggregator
 workflow-api
 workflow-basic-steps
