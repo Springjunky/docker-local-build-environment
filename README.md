@@ -2,7 +2,7 @@
 
 ##### Tired of endless installation and configuration .... ?!
 
-My personal solution is a local, docker-based CI/CD Build Environment ready in a few minutes to offer you a reade-to-use convinience playground with
+My personal solution is a local, docker-based CI/CD Build Environment ready in a few minutes to offer you a reade-to-use convenience playground with
 * Jenkins 
   * open-jdk
   * maven
@@ -14,9 +14,9 @@ My personal solution is a local, docker-based CI/CD Build Environment ready in a
   * push with ssh avialable at port 2222
 * Nexus 3
 * Sonar
-* Postgres (used by Sonar, Keycloak and YOUR applications)
+* Postgres (used by Sonar and YOUR applications)
 * Standard Docker-Registry V2 with a simple UI
-* Portainer 
+* Portainer to check your setup
 
 so you can be your own local "DevOp"; nearly every category of [periodic table of devoptools][4] has one tool in your local setup. 
 
@@ -27,11 +27,11 @@ so you can be your own local "DevOp"; nearly every category of [periodic table o
 ## This is NOT for any cluster (Swarm/Kubernetes)
 
 ### System requirements
-* At least 8GB Memory with 3GB Swap and 10GB Disk-Space
+* At least 8GB Memory with 3GB Swap and 10GB Disk-Space, 16GB ist recommended
 * docker version >= 17.06.0
 * docker-compose version >= 1.15.0
 
-#### Listenports to be claimed
+#### Listenports to be claimed on your host
 
 |Port  |  Why  |
 |---|---|
@@ -44,45 +44,32 @@ so you can be your own local "DevOp"; nearly every category of [periodic table o
 If your change the ports in the docker-compose.yml change them also in nginx-reverse/nginx.conf (stream {...} )
 ## Installation
 
-### First use ./setupEnvironment.sh
+### Importantn: First use ./setupEnvironment.sh
 
 The ./setupEnvironment.sh 
 * configures your settings and generates a .env File used by docker-compose 
 * copies some configuration File to your local directory
 * Donloads all the Jenkins-Plugins to jenkins-fat/Plugins directory to save time.
 * generates ssl-keys and certificates to use with git clone and the docker registry
- 
- 
+  
 
 Bring up your own DevOp Playground  ... just do a
 
-### micro setup (GitLab,GitLab-runner) takes 4GiB
+### setup without sonar, takes 76GiB
 ```
  git clone https://github.com/Springjunky/docker-local-build-environment.git
  cd docker-local-build-environment
  sudo ./setupEnvironment.sh
- docker-compose -f docker-compose-micro-ci.yml up --build -d
- docker-compose logs
+ docker-compose up --build 
 ```
-starts 3 container
+starts 9 container
 
-### minimal setup (GitLab,GitLab-runner,Jenkins,Nexus,Postgres) takes 6GiB
+### setup sonar, takes 10GiB
 ```
  git clone https://github.com/Springjunky/docker-local-build-environment.git
  cd docker-local-build-environment
  sudo ./setupEnvironment.sh
- docker-compose -f docker-compose-minimal-ci.yml up --build -d
- docker-compose logs
-```
-starts 6 container
-
-### standard setup (same like above with portainer, sonar, Docker-Registry and simple Docker-Registry-UI) takes 10GiB
-```
-   git clone https://github.com/Springjunky/docker-local-build-environment.git
-   cd docker-local-build-environment
-   sudo ./setupEnvironment.sh
-   docker-compose --build -d
-   docker-compose logs
+ docker-compose -f docker-compose.yml -f docker-compose-sonar.yml  up --build 
 ```
 starts 10 container
 
