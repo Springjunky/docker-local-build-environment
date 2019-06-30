@@ -44,7 +44,7 @@ so you can be your own local "DevOp"; nearly every category of [periodic table o
 If your change the ports in the docker-compose.yml change them also in nginx-reverse/nginx.conf (stream {...} )
 ## Installation
 
-### Importantn: First use ./setupEnvironment.sh
+### Important: First use ./setupEnvironment.sh
 
 The ./setupEnvironment.sh 
 * configures your settings and generates a .env File used by docker-compose 
@@ -55,7 +55,7 @@ The ./setupEnvironment.sh
 
 Bring up your own DevOp Playground  ... just do a
 
-### setup without sonar, takes 76GiB
+### setup without sonar, takes 7GiB
 ```
  git clone https://github.com/Springjunky/docker-local-build-environment.git
  cd docker-local-build-environment
@@ -64,7 +64,7 @@ Bring up your own DevOp Playground  ... just do a
 ```
 starts 9 container
 
-### setup sonar, takes 10GiB
+### setup with sonar, takes 10GiB
 ```
  git clone https://github.com/Springjunky/docker-local-build-environment.git
  cd docker-local-build-environment
