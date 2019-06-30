@@ -1,4 +1,4 @@
-FROM gitlab/gitlab-runner
+FROM gitlab/gitlab-runner:v12.0.1
 
 # The giltab multirunner ist an officila Image by gitlab 
 

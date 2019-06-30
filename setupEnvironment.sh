@@ -11,6 +11,8 @@ fi
 
 echo "Prepare .env for compose file and directorys"
 
+#------------------- Defaults 
+JENKINS_LTS=2.176.1
 USER_DATA_DIR=$HOME/devstack-data
 HOSTNAME=$(hostname)
 HOSTIP=$(hostname -I | awk '{print $1}' )
@@ -26,42 +28,59 @@ echo "########################################################################"
 
 pause
 
+echo "--------------------------------------------------------------"
+echo "------------------ Host-Settings -----------------------------"
+echo "--------------------------------------------------------------"
+
 read -e -p "Your hostname (hit return if $HOSTNAME is correct) : " -i $HOSTNAME GIVEN_HOSTNAME
 echo "Setting HOSTNAME to $GIVEN_HOSTNAME"
 HOSTNAME=$GIVEN_HOSTNAME
-
 echo "Type your hostIP, I guess it is one of $(hostname -I) "
 echo "Remember, 127.0.0.1 is NOT the correct IP and the docker-Network starts with 172.x.y.z and is also not correct"
-
 read -e -p "Your hostIP  : " -i $HOSTIP GIVEN_HOSTIP
 HOSTIP=$GIVEN_HOSTIP
 echo "Setting HOSTIP to $GIVEN_HOSTIP"
 echo " "
-echo "Choose your weapons: Number of plugins to download for Jenkins "
-echo "  (L)et _ME_ choose (0 Plugins)"
-echo "  (S)uggested (72 Plugins)"
-echo "  (M)uch more (146 Plugins)"
-PLUGINS=S
-read -e -p "Choose S or M : " -i $PLUGINS GIVEN_PLUGINS
 
+echo "--------------------------------------------------------------"
+echo "------------------ Jenkins ----- -----------------------------"
+echo "--------------------------------------------------------------"
+read -e -p "Please enter your Jenkins-Version (2.176.1) : " -i $JENKINS_LTS GIVEN_JENKINS_VERSION
+echo "Number of plugins to download for Jenkins ${JENKINS_LTS_MAJOR}.${JENKINS_LTS_MINOR}.${JENKINS_LTS_BUILD} "
+echo "  (L)et _ME_ choose (0 Plugins)"
+echo "  (P)redonwload Plugins (defined in ./jenkins-fat/plugins.txt) "
+PLUGINS=P
+read -e -p "Choose L or P : " -i $PLUGINS GIVEN_PLUGINS
+
+
+# Set the right volume-names, hostname and host_ip in .env for docker-compose.yml
+echo "---------- generating .env file for docker-compose.yml "
+
+# this enivonment file is sourced by the preDownload.sh script in jenkins-fat
+cat .env.template > .env
+echo "DC_HOSTNAME=${HOSTNAME}" >> .env
+echo "DC_HOSTIP=${HOSTIP}" >> .env
+echo "DC_BASE_DATA_DIR=${USER_DATA_DIR}" >> .env
+echo "JENKINS_LTS_MAJOR=$(echo $GIVEN_JENKINS_VERSION | cut -d. -f1)" >> .env
+echo "JENKINS_LTS_MINOR=$(echo $GIVEN_JENKINS_VERSION | cut -d. -f2)" >> .env
+echo "JENKINS_LTS_BUILD=$(echo $GIVEN_JENKINS_VERSION | cut -d. -f3)" >> .env
+echo "JENKINS_LTS=$(echo $GIVEN_JENKINS_VERSION | cut -d. -f1).$(echo $GIVEN_JENKINS_VERSION | cut -d. -f2)" >> .env
 case $GIVEN_PLUGINS in 
-      "L")
-      echo "Choose your own weapons (Jenkins will ask...you choose)"
-      > jenkins-fat/active-plugins.txt
+      "L"|"l" )
+      echo "Pluigns for Jenkins  ${JENKINS_LTS_MAJOR}.${JENKINS_LTS_MINOR}.${JENKINS_LTS_BUILD} is your choice"
       ;;
-      "S")
-      echo "Jenkins will ask you, just say OK to use suggested plugins"
-      cp jenkins-fat/suggested-plugins.txt jenkins-fat/active-plugins.txt 
-      ;;
-      "M")
-      echo "Jenkins will ask you, just say OK to use tons of plugins"
-      cp jenkins-fat/max-plugins.txt jenkins-fat/active-plugins.txt 
+      "P"|"p")
+      echo "..start Donloading and cache Plugins to ./jenkins-fat/Plugins/${JENKINS_LTS_MAJOR}.${JENKINS_LTS_MINOR}"
+      pause
+      cd jenkins-fat 
+      . preDownload.sh  
+      cd -
       ;;
 esac
 
-chmod a+rw jenkins-fat/active-plugins.txt 
-
-pause
+echo "--------------------------------------------------------------"
+echo "------------------ ssl ---------------------------------------"
+echo "--------------------------------------------------------------"
 
 type openssl 2>/dev/null
 if [ $? -eq 0 ] ; then
@@ -76,9 +95,13 @@ echo "create need host-volumes"
 mkdir -p $USER_DATA_DIR/sonar/sonarqube_conf
 mkdir -p $USER_DATA_DIR/jenkins
 mkdir -p $USER_DATA_DIR/gitlab/config/ssl
+mkdir -p $USER_DATA_DIR/gitlab-runner
 mkdir -p $USER_DATA_DIR/nexus
 mkdir -p $USER_DATA_DIR/docker-registry/images
 chown -R 200 $USER_DATA_DIR/nexus
+chmod -R a+rw $USER_DATA_DIR
+
+
 #----------------------------------
 
 echo "Create a self-signed certificate for your host: $HOSTNAME to prevent docker complaining unsecure (gitlab) registry "
@@ -129,20 +152,15 @@ fi
 cp -r preconfig/jenkins/* $USER_DATA_DIR/jenkins/
 
 # Copy Registry Config
-cp preconfig/docker-registry/config.yml $USER_DATA_DIR/docker-registry
+cp preconfig/docker-registry/config.yml $USER_DATA_DIR/docker-registry/config.yml
 
-# Prepare the sample-project to run on <your-host>
-sed -i s#HOSTNAME#${HOSTNAME}#g  spring-boot-keycloak-sample/src/main/resources/application.properties 
-sed -i s#HOSTNAME#${HOSTNAME}#g  spring-boot-keycloak-sample/src/main/resources/static/index.html 
-
-# Set the right volume-names, hostname and host_ip in .env for docker-compose.yml
-echo "---------- generating .env file for docker-compose.yml "
-cat .env.template > .env
-echo "DC_HOSTNAME=${HOSTNAME}" >> .env
-echo "DC_HOSTIP=${HOSTIP}" >> .env
-echo "DC_BASE_DATA_DIR=${USER_DATA_DIR}" >> .env
 chmod a+rw .env
+echo "---------------------------------------------------------------"
+echo "------------------ generated Environment for Docker-Compose ---"
+echo "---------------------------------------------------------------"
+
 echo "---------- generated file  ---------------------------- "
+
 cat .env
 echo "-------------------------------------------------------------------------------------------"
 echo "If something changed (your IP / hostname ... ) just edit the .env or rerun the script."

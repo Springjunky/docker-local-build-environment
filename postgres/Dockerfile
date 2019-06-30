@@ -1,5 +1,5 @@
 # vim:set ft=dockerfile:
-FROM postgres 
+FROM postgres:11.4-alpine 
 
 COPY createSonar.sql /docker-entrypoint-initdb.d/
-COPY createKeycloak.sql /docker-entrypoint-initdb.d/
+

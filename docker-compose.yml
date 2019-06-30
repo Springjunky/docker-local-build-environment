@@ -26,12 +26,13 @@ services:
        - gitlab
        - jenkins
        - nexus
+       - portainer
      networks:
        - devstacknetwork
 # ------------------------------------------------------------------------------
   regweb:
     container_name: docker-registry-web
-    image: hyper/docker-registry-web
+    image: hyper/docker-registry-web:v0.1.2
     networks:
       - devstacknetwork
     extra_hosts:
@@ -42,9 +43,20 @@ services:
       - REGISTRY_READONLY=false 
       - REGISTRY_CONTEXT_PATH=/regweb
 # ------------------------------------------------------------------------------
+  portainer:
+    image: portainer/portainer:linux-amd64-1.21.0
+    container_name: portainer
+    command: --no-auth
+    networks:
+      - devstacknetwork
+    extra_hosts:
+      - ${DC_HOSTNAME}:${DC_HOSTIP}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+# ------------------------------------------------------------------------------
   registry:
     container_name: registry
-    image: registry:2
+    image: registry:2.7.1
     network_mode: "host"
     ports:
       - 5000:5000
@@ -68,11 +80,12 @@ services:
       # https://github.com/docker-library/postgres/blob/4e48e3228a30763913ece952c611e5e9b95c8759/Dockerfile.template#L52
       # there is ENV PGDATA /var/lib/postgresql/data
       - ${DC_BASE_DATA_DIR}/postgres-db/postgresql_data:/var/lib/postgresql/data
-    
 # ------------------------------------------------------------------------------
-
   jenkins:
-    build: jenkins-fat
+    build: 
+      context: jenkins-fat
+      args:
+        JENKINS_LTS_VERSION: ${JENKINS_LTS}
     container_name: jenkins-fat
     extra_hosts:
       - ${DC_HOSTNAME}:${DC_HOSTIP}
@@ -81,10 +94,9 @@ services:
     volumes:
       - ${DC_BASE_DATA_DIR}/jenkins:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-
 # ------------------------------------------------------------------------------
   gitlab:
-    image: 'gitlab/gitlab-ce:latest'
+    image: 'gitlab/gitlab-ce:12.0.2-ce.0'
     container_name: gitlab-ce
     extra_hosts:
       - ${DC_HOSTNAME}:${DC_HOSTIP}
@@ -111,9 +123,9 @@ services:
       - ${DC_BASE_DATA_DIR}/gitlab/config:/etc/gitlab
       - ${DC_BASE_DATA_DIR}/gitlab/logs:/var/log/gitlab
       - ${DC_BASE_DATA_DIR}/gitlab/data:/var/opt/gitlab
-# ------------------------------------------------------------------------------
+## ------------------------------------------------------------------------------
   nexus:
-    image: sonatype/nexus3
+    image: sonatype/nexus3:3.17.0
     container_name: sonatype-nexus3
     extra_hosts:
       - ${DC_HOSTNAME}:${DC_HOSTIP}

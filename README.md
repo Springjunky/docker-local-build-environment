@@ -14,11 +14,9 @@ My personal solution is a local, docker-based CI/CD Build Environment ready in a
   * push with ssh avialable at port 2222
 * Nexus 3
 * Sonar
-* Keykloak (as Single Sign On or JWT playground)
 * Postgres (used by Sonar, Keycloak and YOUR applications)
-* Standard Docker-Registry V2 with a simple UI 
-
-
+* Standard Docker-Registry V2 with a simple UI
+* Portainer 
 
 so you can be your own local "DevOp"; nearly every category of [periodic table of devoptools][4] has one tool in your local setup. 
 
@@ -46,6 +44,16 @@ so you can be your own local "DevOp"; nearly every category of [periodic table o
 If your change the ports in the docker-compose.yml change them also in nginx-reverse/nginx.conf (stream {...} )
 ## Installation
 
+### First use ./setupEnvironment.sh
+
+The ./setupEnvironment.sh 
+* configures your settings and generates a .env File used by docker-compose 
+* copies some configuration File to your local directory
+* Donloads all the Jenkins-Plugins to jenkins-fat/Plugins directory to save time.
+* generates ssl-keys and certificates to use with git clone and the docker registry
+ 
+ 
+
 Bring up your own DevOp Playground  ... just do a
 
 ### micro setup (GitLab,GitLab-runner) takes 4GiB
@@ -68,31 +76,12 @@ starts 3 container
 ```
 starts 6 container
 
-### medium setup without sonar (same like above and with Docker-Registry and simple Docker-Registry-UI) takes 8GiB
+### standard setup (same like above with portainer, sonar, Docker-Registry and simple Docker-Registry-UI) takes 10GiB
 ```
    git clone https://github.com/Springjunky/docker-local-build-environment.git
    cd docker-local-build-environment
    sudo ./setupEnvironment.sh
    docker-compose --build -d
-   docker-compose logs
-```
-starts 8 container
-
-### maximum setup (same like above and with Sonar and Keycloak) takes more than 10GiB
-```
-   git clone https://github.com/Springjunky/docker-local-build-environment.git
-   cd docker-local-build-environment
-   sudo ./setupEnvironment.sh
-
-   # Sonar only
-   docker-compose  -f docker-compose.yml -f docker-compose-sonar.yml up --build
-
-   # Sonar AND Keycloak
-   docker-compose  -f docker-compose.yml -f docker-compose-sonar.yml -f docker-compose-keycloak.yml up --build
-
-   # Keycloak only
-   docker-compose  -f docker-compose.yml -f docker-compose-keycloak.yml up --build
-   
    docker-compose logs
 ```
 starts 10 container
@@ -109,12 +98,11 @@ Now you are ready to go with a little CI/CD Environment:
  Nexus  http://<your-host-name>/nexus
  Gitlab  http://<your-host-name>/gitlab
  Sonar  http://<your-host-name>/sonar
- Keycloak http://<your-host-name>/auth
+ Portainer http://<your-host-name>/portainer
  Docker-Registry-Ui: http://<your-host-name>/regweb 
  Postgres: At standard listenport 5432 for your jdbc-connection-string 
            stream-passthrough to postgres-container.
 ```
-
 #### Security
 ... not really, its all http .. don't worry about it! It's only local communication
 
@@ -128,33 +116,31 @@ See Readme in folder security-paranoia if you want to have some hints how to con
 |Nexus   | admin | admin123 |
 |Gitlab  | root  | gitlab4me |
 |Sonar | admin | admin |
-|Keycloak|admin|admin|
 |Postgres|postgres|admin|
 
 ## The Tools
 There are some configurations you have to do after setup.
 *Remember:* At every time use your real hostname and NOT localhost (locahost inside a container is the container itself).
-For example: If yuo configure a GitLab-Connection in Jenkins, you will reach Gitlab at http://&lt;you host&gt;/gitlab and not http://localhost/gitlab
+
+For example: If you configure a GitLab-Connection in Jenkins, you will reach Gitlab at http://&lt;your host&gt;/gitlab and not http://localhost/gitlab
 ### Jenkins
 * MAVEN_HOME is /opt/maven
 * JAVA_HOME is /usr/lib/jvm/java-8-openjdk-amd64
-* Blue Ocean is installed if you choose (M)uch mor plugins and works perfect with a GitHUB Account, not GitLab ... sorry, this is Jenkins.
-  You need to be logged as a jenkins-user to use Blue Ocean
 
-###  Giltab
+###  GitLab
 * the docker-registry from GitLab is at port 5555 (and secured with an openssl certificate ..thats part of
   setupEnvironment.sh), just create a project in gitlab and click at the registry tab to show
   how to login to the project registry and how to tag your images and upload them.
 * ssh cloning and pushing is at port 2222 (ssh://git@myHOST:2222/scott/foo.git remeber to upload your public key before, should be ~/.ssh/id_rsa.pub )
+* http cloning and pushing is only http NOT https
 
 #### gitlab-runner
-The runner is a gitlab-multirunner image with a docker-runner (concurrent=1) , based on [gitlab/gitlab-runner][2]  at every startup any runner is removed and only ONE new runner 
-is registrated to avoid multiple runners  (the pipeline-history maybe lost.) 
+The runner is a gitlab-multirunner image with a docker-runner (concurrent=1) , based on [gitlab/gitlab-runner][2]  at every startup any runner is removed 
+and only ONE new runner is registrated to avoid multiple runners  (the pipeline-history maybe lost.) 
 setups with a shell-runner works, docker-in-docker (docker:dind) or docker based builds should cause trouble because the 
 default DNS-Server of a docker-container ist 8.8.8.8 (google) see this link [extra_host for servce][5] for a possible workaround 
 
 It takes a long time until gitlab is ready to accept a runner registration, if it fails, increase the REGISTER_TRYS in docker-compse.yml
-
 
 #### Jenkins and Gitlab
 
@@ -162,21 +148,6 @@ Gitlab is very very fast with new releases and sometimes the api has breaking ch
 
 ### Sonar
 You need to install some rules (Administration - System - Update Center - Available - Search: Java)
-
-### Keycloak
-There is a testproject in folder spring-boot-keycloak-sample, it is a standard Spring-Boot which you can start with
-```
-mv spring-boot:run
-``` 
-Use your browser and navigate to the "landing-page" at http://your-host:8081 the "My products" link will redirect you to Keycloak (must be setup with settings from [this tutorial][3], but use your *REAL* hostname, not _localhost_ as Valid Redirect URI's )
- 
-_tl;dr_
-* login as user:admin, password:admin
-* create realm "springboot"
-* create client "product-app" as openid-connect client with Valid Redirect URI's  http://&lt;your host&gt;:8081/*
-* create role "user"
-* create user "testuser" and map the role "user" to testuser (tab Role Mappings)
-
 
 ### Postgres
 You can use any tool to connect to the database at localhost:5432 this is a pass through to the container so any
@@ -211,9 +182,6 @@ every ping must work, if not, check the .env file, is there the correct DC_HOSTN
 
 ##### consider low memory:
   with an amount lower than 8GB sonar and embedded eleastic search did not startup and no message is displayed
-
-##### too many plugins to download:
-  You can do an "pre download of the plugins", see the readme.md at jenkins-fat direcory
 
 
 ## Starting from scratch
