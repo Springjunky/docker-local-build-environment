@@ -11,7 +11,7 @@ My personal solution is a local, docker-based CI/CD Build Environment ready in a
 * Gitlab 
   * and a docker based gitlab-runner registrated
   * secured docker-registry ready (openssh certificate)
-  * push with ssh avialable at port 2222
+  * push with ssh available at port 2222
 * Nexus 3
 * Sonar
 * Postgres (used by Sonar and YOUR applications)
