@@ -94,12 +94,9 @@ ARG JENKINS_LTS_VERSION
 RUN echo JENKINS_LTS_VERSION=${JENKINS_LTS_VERSION}
 
 #### jenkins.war checksum, download will be validated using it
-ARG JENKINS_SHA=1ab9577a29362ae9cb51742d9778b44a5c820a9e
 ARG JENKINS_URL=http://updates.jenkins-ci.org/download/war/${JENKINS_LTS_VERSION}/jenkins.war
 # could use ADD but this one does not check Last-Modified header neither does it allow to control checksum  see https://github.com/docker/docker/issues/8331
-RUN echo Download from ${JENKINS_URL} && \
-    curl -fL ${JENKINS_URL} -o /usr/share/jenkins/jenkins.war && \
-    echo "${JENKINS_SHA}  /usr/share/jenkins/jenkins.war" | sha1sum -c -
+RUN echo Download from ${JENKINS_URL} && curl -fL ${JENKINS_URL} -o /usr/share/jenkins/jenkins.war 
 
 ###### # Copy all Cached plugins ...
 COPY Plugins/${JENKINS_LTS_VERSION}/* /usr/share/jenkins/ref/plugins/
