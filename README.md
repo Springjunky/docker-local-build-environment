@@ -2,6 +2,10 @@
 
 ##### Tired of endless installation and configuration .... ?!
 
+
+## NOte 
+- good stuff
+
 My personal solution is a local, docker-based CI/CD Build Environment ready in a few minutes to offer you a reade-to-use convenience playground with
 * Jenkins 
   * open-jdk
